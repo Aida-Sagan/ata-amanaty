@@ -9,33 +9,58 @@ import * as yup from "yup";
 import axios from "axios";
 import Image from "next/image";
 
-const schema = yup.object().shape({
+const schema: yup.ObjectSchema<FormDataType> = yup.object().shape({
     lookingFor: yup.string().required("Выберите, кого ищете"),
     returnedFromWar: yup.string().required("Выберите, вернулся ли человек с войны"),
     lastName: yup.string().required("Фамилия обязательна"),
     firstName: yup.string().required("Имя обязательно"),
-    middleName: yup.string(),
+    middleName: yup.string().optional(),
     birthDate: yup.string().required("Дата рождения обязательна"),
     birthPlaceCountryRegion: yup.string().required("Укажите место рождения (страна, область)"),
     birthPlaceCity: yup.string().required("Укажите место рождения (город, район)"),
     conscriptionDate: yup.string().required("Введите дату призыва"),
     maritalStatus: yup.string().required("Выберите семейный статус"),
-    childrenNames: yup.string(),
-    relativesListed: yup.string(),
-    prisoner: yup.boolean(),
-    prisonerInfo: yup.string(),
+    childrenNames: yup.string().optional(),
+    relativesListed: yup.string().optional(),
+    prisoner: yup.boolean().default(false),
+    prisonerInfo: yup.string().optional(),
     searcherFullName: yup.string().required("ФИО обязательно"),
     phoneNumber: yup.string().required("Номер телефона обязателен"),
-    homeAddress: yup.string(),
-    email: yup.string().email("Введите корректный email"),
+    homeAddress: yup.string().optional(),
+    email: yup.string().email("Введите корректный email").required("Email обязателен"),
     heardAboutUs: yup.string().required("Выберите источник"),
-    heardAboutUsOther: yup.string(),
+    heardAboutUsOther: yup.string().optional(),
 });
+
+
+interface FormDataType {
+    lookingFor: string;
+    returnedFromWar: string;
+    lastName: string;
+    firstName: string;
+    middleName?: string;
+    birthDate: string;
+    birthPlaceCountryRegion: string;
+    birthPlaceCity: string;
+    conscriptionDate: string;
+    maritalStatus: string;
+    childrenNames?: string;
+    relativesListed?: string;
+    prisoner: boolean;
+    prisonerInfo?: string;
+    searcherFullName: string;
+    phoneNumber: string;
+    homeAddress?: string;
+    email: string;
+    heardAboutUs: string;
+    heardAboutUsOther?: string;
+}
+
 
 export default function FormPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const { control, handleSubmit, register, watch, setValue, formState: { errors } } = useForm({
+    const { control, handleSubmit, register, watch, formState: { errors } } = useForm<FormDataType>({
         resolver: yupResolver(schema),
         defaultValues: {
             lookingFor: "",
@@ -61,7 +86,7 @@ export default function FormPage() {
         },
     });
 
-    const onSubmit = async (data: any) => {
+    const onSubmit = async (data: FormDataType) => {
         setLoading(true);
         try {
             const response = await axios.post("/api/requests", data);
