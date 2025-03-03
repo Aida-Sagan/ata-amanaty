@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Container, Typography, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Box, Pagination } from "@mui/material";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -37,40 +37,42 @@ export default function AdminPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-
+    const fetchRequests = useCallback(async () => {
+        try {
+            const response = await axios.get("/api/requests");
+            setRequests(response.data.data);
+        } catch (error) {
+            console.error("Ошибка при загрузке заявок:", error);
+        }
+    }, []);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        console.log(auth);
-        if (!token) {
-            router.push("/admin/login");
-            return;
-        }
+        const authenticate = async () => {
+            const token = localStorage.getItem("token");
+            console.log(auth);
 
+            if (!token) {
+                router.push("/admin/login");
+                return;
+            }
 
-        try {
-            const decoded: DecodedToken = jwtDecode(token);
-            if (!decoded.username) throw new Error("Недействительный токен");
-            setAuth(true);
-        } catch (error) {
-            console.error("Ошибка при декодировании токена:", error);
-            localStorage.removeItem("token");
-            router.push("/admin/login");
-        } finally {
-            setAuthLoading(false);
-        }
-
-        const fetchRequests = async () => {
             try {
-                const response = await axios.get("/api/requests");
-                setRequests(response.data.data);
+                const decoded: DecodedToken = jwtDecode(token);
+                if (!decoded.username) throw new Error("Недействительный токен");
+                setAuth(true);
             } catch (error) {
-                console.error("Ошибка при загрузке заявок:", error);
+                console.error("Ошибка при декодировании токена:", error);
+                localStorage.removeItem("token");
+                router.push("/admin/login");
+            } finally {
+                setAuthLoading(false);
             }
         };
 
-        fetchRequests();
-    }, []);
+        authenticate().then(fetchRequests).catch(console.error); // ✅ Обрабатываем ошибки
+
+    }, [router, fetchRequests]); // ✅ Добавили `fetchRequests` в зависимости
+
 
     const statusColors: Record<string, string> = {
         "В обработке": "bg-yellow-lt",

@@ -8,13 +8,37 @@ import {
 import { IconNotes, IconAlertSquareRounded } from '@tabler/icons-react';
 import axios from "axios";
 import StatusChangeAlert from "@/components/alert";
+import { SelectChangeEvent } from "@mui/material";
 
+
+interface RequestData {
+    _id: string;
+    lastName: string;
+    firstName: string;
+    middleName?: string;
+    birthDate: string;
+    birthPlaceCountryRegion: string;
+    birthPlaceCity: string;
+    conscriptionDate: string;
+    maritalStatus: string;
+    childrenNames?: string;
+    relativesListed?: string;
+    prisoner: boolean;
+    prisonerInfo?: string;
+    searcherFullName: string;
+    phoneNumber: string;
+    homeAddress?: string;
+    email: string;
+    heardAboutUs: string;
+    heardAboutUsOther?: string;
+    status: string;
+}
 
 
 export default function AdminRequestPage() {
     const router = useRouter();
-    const { id } = useParams();
-    const [requestData, setRequestData] = useState<any>(null);
+    const { id } = useParams<{ id: string }>();
+    const [requestData, setRequestData] = useState<RequestData | null>(null);
     const [loading, setLoading] = useState(true);
     const [showAlert, setShowAlert] = useState(false);
     const [status, setStatus] = useState("");
@@ -30,13 +54,24 @@ export default function AdminRequestPage() {
             .catch(error => console.error("Ошибка загрузки заявки:", error));
     }, [id]);
 
-    const handleChange = (event: any) => {
-        setRequestData({ ...requestData, [event.target.name]: event.target.value });
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        if (requestData) {
+            setRequestData({ ...requestData, [event.target.name]: event.target.value });
+        }
     };
 
-    const handleCheckboxChange = (event: any) => {
-        setRequestData({ ...requestData, [event.target.name]: event.target.checked });
+    const handleSelectChange = (event: SelectChangeEvent) => {
+        if (requestData) {
+            setRequestData({ ...requestData, [event.target.name]: event.target.value });
+        }
     };
+
+    const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (requestData) {
+            setRequestData({ ...requestData, [event.target.name]: event.target.checked });
+        }
+    };
+
 
     const handleSave = async () => {
         try {
@@ -51,14 +86,14 @@ export default function AdminRequestPage() {
         router.push("/admin"); // Переходим в админ-панель
     };
 
-    const handleUpdateStatus = async (event: any) => {
+    const handleUpdateStatus = async (event: SelectChangeEvent) => {
         const newStatus = event.target.value;
         try {
             await axios.put(`/api/requests`, { id, status: newStatus });
 
             setStatus(newStatus);
             setShowAlert(true); // Показываем алерт сразу
-            setRequestData((prev: any) => ({ ...prev, status: newStatus }));
+            setRequestData(prev => (prev ? { ...prev, status: newStatus } : prev));
 
             setTimeout(() => {
                 setShowAlert(false);
@@ -69,12 +104,13 @@ export default function AdminRequestPage() {
     };
 
 
-    const statusColors: any = {
+    const statusColors: Record<string, string> = {
         "В обработке": "bg-yellow-lt",
         "В процессе": "bg-blue-lt",
         "Найдена": "bg-green-lt",
-        "Отклонена": "bg-red-lt"
+        "Отклонена": "bg-red-lt",
     };
+
 
     if (loading) {
         return <Typography sx={{ mt: 4, fontSize: "1.2rem" }}>Загрузка...</Typography>;
@@ -117,41 +153,41 @@ export default function AdminRequestPage() {
 
                     <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
                         <IconNotes stroke={2} size={40} />
-                        Заявка под номером: {requestData._id}
+                        Заявка под номером: {requestData?._id}
                         <div>
-                            <span className={`badge ${statusColors[requestData.status]}`}>{requestData.status}</span>
+                            <span className={`badge ${statusColors[requestData?.status || ""]}`}>{requestData?.status}</span>
                         </div>
                     </Typography>
 
 
-                    <TextField label="Фамилия" name="lastName" value={requestData.lastName} onChange={handleChange}
+                    <TextField label="Фамилия" name="lastName" value={requestData?.lastName} onChange={handleChange}
                                fullWidth sx={{mb: 2}}/>
-                    <TextField label="Имя" name="firstName" value={requestData.firstName} onChange={handleChange}
+                    <TextField label="Имя" name="firstName" value={requestData?.firstName} onChange={handleChange}
                                fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Отчество" name="middleName" value={requestData.middleName} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Дата рождения" type="date" name="birthDate" value={requestData.birthDate} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Место рождения (Страна, Область)" name="birthPlaceCountryRegion" value={requestData.birthPlaceCountryRegion} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Место рождения (Город, Район)" name="birthPlaceCity" value={requestData.birthPlaceCity} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Дата призыва" type="month" name="conscriptionDate" value={requestData.conscriptionDate} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Отчество" name="middleName" value={requestData?.middleName} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Дата рождения" type="date" name="birthDate" value={requestData?.birthDate} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Место рождения (Страна, Область)" name="birthPlaceCountryRegion" value={requestData?.birthPlaceCountryRegion} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Место рождения (Город, Район)" name="birthPlaceCity" value={requestData?.birthPlaceCity} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Дата призыва" type="month" name="conscriptionDate" value={requestData?.conscriptionDate} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
 
                     {/* Был ли в плену */}
                     <FormControlLabel
-                        control={<Checkbox name="prisoner" checked={requestData.prisoner} onChange={handleCheckboxChange} />}
+                        control={<Checkbox name="prisoner" checked={requestData?.prisoner} onChange={handleCheckboxChange} />}
                         label="Был ли в плену?"
                     />
-                    {requestData.prisoner && (
-                        <TextField label="Где был пленен?" name="prisonerInfo" value={requestData.prisonerInfo} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    {requestData?.prisoner && (
+                        <TextField label="Где был пленен?" name="prisonerInfo" value={requestData?.prisonerInfo} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                     )}
 
-                    <TextField label="ФИО заявителя" name="searcherFullName" value={requestData.searcherFullName} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Номер телефона" name="phoneNumber" value={requestData.phoneNumber} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Домашний адрес" name="homeAddress" value={requestData.homeAddress} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Электронная почта" name="email" value={requestData.email} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="ФИО заявителя" name="searcherFullName" value={requestData?.searcherFullName} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Номер телефона" name="phoneNumber" value={requestData?.phoneNumber} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Домашний адрес" name="homeAddress" value={requestData?.homeAddress} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Электронная почта" name="email" value={requestData?.email} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
 
                     {/* Откуда узнали о нас */}
                     <FormControl fullWidth sx={{ mb: 2 }}>
                         <InputLabel>Откуда узнали о нас?</InputLabel>
-                        <Select name="heardAboutUs" value={requestData.heardAboutUs} onChange={handleChange}>
+                        <Select name="heardAboutUs" value={requestData?.heardAboutUs || ""} onChange={handleSelectChange}>
                             <MenuItem value="Instagram">Instagram</MenuItem>
                             <MenuItem value="Facebook">Facebook</MenuItem>
                             <MenuItem value="TikTok">TikTok</MenuItem>
@@ -159,9 +195,10 @@ export default function AdminRequestPage() {
                             <MenuItem value="internetSearch">Поиск в интернете</MenuItem>
                             <MenuItem value="other">Другое</MenuItem>
                         </Select>
+
                     </FormControl>
-                    {requestData.heardAboutUs === "other" && (
-                        <TextField label="Укажите источник" name="heardAboutUsOther" value={requestData.heardAboutUsOther} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    {requestData?.heardAboutUs === "other" && (
+                        <TextField label="Укажите источник" name="heardAboutUsOther" value={requestData?.heardAboutUsOther} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                     )}
 
                     {/*<Typography variant="h6">Загруженные файлы</Typography>*/}
@@ -200,7 +237,7 @@ export default function AdminRequestPage() {
                         <InputLabel>Изменить статус</InputLabel>
                         <Select
                             name="status"
-                            value={requestData.status}
+                            value={requestData?.status}
                             onChange={handleUpdateStatus}
                         >
                             <MenuItem value="В обработке">В обработке</MenuItem>
