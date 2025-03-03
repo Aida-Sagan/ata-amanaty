@@ -8,28 +8,49 @@ import CircularWithValueLabel from "@/components/CircularWithValueLabel";
 import { IconDatabaseEdit, IconLogout } from '@tabler/icons-react';
 import { jwtDecode } from "jwt-decode";
 
+
+interface Request {
+    _id: string;
+    lookingFor: string;
+    returnedFromWar: string;
+    lastName: string;
+    firstName: string;
+    searcherFullName: string;
+    phoneNumber: string;
+    email: string;
+    status: string;
+    createdAt: string;
+}
+
+interface DecodedToken {
+    username: string;
+}
+
+
 export default function AdminPage() {
     const [auth, setAuth] = useState(false);
     const [authLoading, setAuthLoading] = useState(true);
     const router = useRouter();
-    const [requests, setRequests] = useState([]);
+    const [requests, setRequests] =  useState<Request[]>([]);
     const [search, setSearch] = useState("");
     const [sortAsc, setSortAsc] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
+
+
     useEffect(() => {
         const token = localStorage.getItem("token");
-
+        console.log(auth);
         if (!token) {
             router.push("/admin/login");
             return;
         }
 
-        try {
-            const decoded: any = jwtDecode(token);
-            if (!decoded.username) throw new Error("Недействительный токен");
 
+        try {
+            const decoded: DecodedToken = jwtDecode(token);
+            if (!decoded.username) throw new Error("Недействительный токен");
             setAuth(true);
         } catch (error) {
             console.error("Ошибка при декодировании токена:", error);
@@ -51,12 +72,13 @@ export default function AdminPage() {
         fetchRequests();
     }, []);
 
-    const statusColors: any = {
+    const statusColors: Record<string, string> = {
         "В обработке": "bg-yellow-lt",
         "В процессе": "bg-blue-lt",
         "Найдена": "bg-green-lt",
-        "Отклонена": "bg-red-lt"
+        "Отклонена": "bg-red-lt",
     };
+
 
     const handleSortByDate = () => {
         setSortAsc(!sortAsc);

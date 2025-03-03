@@ -5,14 +5,37 @@ import { useRouter } from "next/navigation";
 import { TextField, Button, Container, Typography, Box, MenuItem, FormControl, InputLabel, Select, Checkbox, FormControlLabel } from "@mui/material";
 import axios from "axios";
 import Image from "next/image";
+import { SelectChangeEvent } from "@mui/material";
+
+
+interface RequestData {
+    _id: string;
+    lastName: string;
+    firstName: string;
+    middleName?: string;
+    birthDate: string;
+    birthPlaceCountryRegion: string;
+    birthPlaceCity: string;
+    conscriptionDate: string;
+    maritalStatus: string;
+    childrenNames?: string;
+    relativesListed?: string;
+    prisoner: boolean;
+    prisonerInfo?: string;
+    searcherFullName: string;
+    phoneNumber: string;
+    homeAddress?: string;
+    email: string;
+    heardAboutUs: string;
+    heardAboutUsOther?: string;
+}
 
 export default function VerifyPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [requestData, setRequestData] = useState<any>(null);
-    const [isLoadingData, setIsLoadingData] = useState(true); // Добавляем индикатор загрузки данных
+    const [requestData, setRequestData] = useState<RequestData | null>(null);
+    const [isLoadingData, setIsLoadingData] = useState(true);
 
-    // 📌 Функция загрузки данных заявки
     const fetchData = useCallback(async () => {
         const requestId = localStorage.getItem("requestId");
         if (!requestId) {
@@ -32,27 +55,25 @@ export default function VerifyPage() {
         }
     }, [router]);
 
-
     useEffect(() => {
         fetchData();
     }, [fetchData]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setRequestData({
-            ...requestData,
-            [event.target.name]: event.target.value as string
-        });
+        if (!requestData) return;
+        setRequestData({ ...requestData, [event.target.name]: event.target.value });
     };
 
-    const handleSelectChange = (event: any) => {
+    const handleSelectChange = (event: SelectChangeEvent<string>) => {
+        if (!requestData) return;
         setRequestData({ ...requestData, [event.target.name]: event.target.value });
     };
 
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!requestData) return;
         setRequestData({ ...requestData, [event.target.name]: event.target.checked });
     };
 
-    // 📌 Функция обновления заявки
     const handleUpdate = async () => {
         if (!requestData?._id) {
             alert("Ошибка: ID заявки отсутствует.");
@@ -63,7 +84,7 @@ export default function VerifyPage() {
         try {
             await axios.put(`/api/requests`, {
                 id: requestData._id,
-                ...requestData, // Отправляем все данные заявки
+                ...requestData,
             });
 
             router.push("/success-page");
@@ -75,11 +96,15 @@ export default function VerifyPage() {
         }
     };
 
+    if (!requestData) {
+        return <Typography align="center">Загрузка данных...</Typography>;
+    }
     if (isLoadingData) {
         return <Typography align="center">Загрузка данных...</Typography>;
     }
 
     return (
+
         <Container maxWidth="md"
                    sx={{
                        flex: 1, // Занимает всю доступную ширину, но делится с другим Box
