@@ -5,8 +5,6 @@ import {useParams, useRouter} from "next/navigation";
 import {
     Typography,
     Box,
-    Card,
-    CardContent,
     Button,
     TextField,
     FormControlLabel,
@@ -15,11 +13,35 @@ import {
 } from "@mui/material";
 import axios from "axios";
 
+
+interface RequestData {
+    _id: string;
+    lastName: string;
+    firstName: string;
+    middleName?: string;
+    birthDate: string;
+    birthPlaceCountryRegion: string;
+    birthPlaceCity: string;
+    conscriptionDate: string;
+    maritalStatus: string;
+    childrenNames?: string;
+    relativesListed?: string;
+    prisoner: boolean;
+    prisonerInfo?: string;
+    searcherFullName: string;
+    phoneNumber: string;
+    homeAddress?: string;
+    email: string;
+    heardAboutUs: string;
+    heardAboutUsOther?: string;
+    status: string;
+}
+
 export default function StatusPage() {
     const router = useRouter(); // Хук для перехода между страницами
 
     const { requestNumber } = useParams(); // Получаем параметр ID заявки
-    const [requestData, setRequestData] = useState<any>(null);
+    const [requestData, setRequestData] = useState<RequestData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -34,6 +56,7 @@ export default function StatusPage() {
                     setError("Заявка не найдена.");
                 }
             } catch (err) {
+                console.error(err);
                 setError("Ошибка при загрузке заявки.");
             } finally {
                 setLoading(false);
@@ -43,12 +66,13 @@ export default function StatusPage() {
         fetchRequestData();
     }, [requestNumber]);
 
-    const statusColors: any = {
+    const statusColors: Record<string, string> = {
         "В обработке": "bg-yellow-lt",
         "В процессе": "bg-blue-lt",
         "Найдена": "bg-green-lt",
-        "Отклонена": "bg-red-lt"
+        "Отклонена": "bg-red-lt",
     };
+
 
     if (loading) return <Typography>Загрузка...</Typography>;
     if (error) return <Typography color="error">{error}</Typography>;
@@ -89,32 +113,32 @@ export default function StatusPage() {
                 >
 
                 <Typography variant="h4" sx={{color: '#313c52', mb: '20px',fontWeight: '700' }}>Заявка №: {requestNumber}</Typography>
-                    <TextField label="Фамилия" name="lastName" value={requestData.lastName} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Имя" name="firstName" value={requestData.firstName} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Отчество" name="middleName" value={requestData.middleName} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Дата рождения" type="date" name="birthDate" value={requestData.birthDate} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Место рождения (Страна, Область)" name="birthPlaceCountryRegion" value={requestData.birthPlaceCountryRegion} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Место рождения (Город, Район)" name="birthPlaceCity" value={requestData.birthPlaceCity} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Дата призыва" type="month" name="conscriptionDate" value={requestData.conscriptionDate} fullWidth sx={{ mb: 2 }} disabled/>
+                    <TextField label="Фамилия" name="lastName" value={requestData?.lastName} fullWidth sx={{ mb: 2 }} disabled/>
+                    <TextField label="Имя" name="firstName" value={requestData?.firstName} fullWidth sx={{ mb: 2 }} disabled/>
+                    <TextField label="Отчество" name="middleName" value={requestData?.middleName} fullWidth sx={{ mb: 2 }} disabled/>
+                    <TextField label="Дата рождения" type="date" name="birthDate" value={requestData?.birthDate} fullWidth sx={{ mb: 2 }} disabled/>
+                    <TextField label="Место рождения (Страна, Область)" name="birthPlaceCountryRegion" value={requestData?.birthPlaceCountryRegion} fullWidth sx={{ mb: 2 }} disabled/>
+                    <TextField label="Место рождения (Город, Район)" name="birthPlaceCity" value={requestData?.birthPlaceCity} fullWidth sx={{ mb: 2 }} disabled/>
+                    <TextField label="Дата призыва" type="month" name="conscriptionDate" value={requestData?.conscriptionDate} fullWidth sx={{ mb: 2 }} disabled/>
 
                     {/* Был ли в плену */}
                     <FormControlLabel
-                        control={<Checkbox name="prisoner" checked={requestData.prisoner} disabled />}
+                        control={<Checkbox name="prisoner" checked={requestData?.prisoner} disabled />}
                         label="Был ли в плену?"
                     />
-                    {requestData.prisoner && (
-                        <TextField label="Где был пленен?" name="prisonerInfo" value={requestData.prisonerInfo} fullWidth sx={{ mb: 2 }} disabled />
+                    {requestData?.prisoner && (
+                        <TextField label="Где был пленен?" name="prisonerInfo" value={requestData?.prisonerInfo} fullWidth sx={{ mb: 2 }} disabled />
                     )}
 
-                    <TextField label="ФИО заявителя" name="searcherFullName" value={requestData.searcherFullName} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Номер телефона" name="phoneNumber" value={requestData.phoneNumber} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Домашний адрес" name="homeAddress" value={requestData.homeAddress} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Электронная почта" name="email" value={requestData.email} fullWidth sx={{ mb: 2 }} disabled/>
+                    <TextField label="ФИО заявителя" name="searcherFullName" value={requestData?.searcherFullName} fullWidth sx={{ mb: 2 }} disabled/>
+                    <TextField label="Номер телефона" name="phoneNumber" value={requestData?.phoneNumber} fullWidth sx={{ mb: 2 }} disabled/>
+                    <TextField label="Домашний адрес" name="homeAddress" value={requestData?.homeAddress} fullWidth sx={{ mb: 2 }} disabled/>
+                    <TextField label="Электронная почта" name="email" value={requestData?.email} fullWidth sx={{ mb: 2 }} disabled/>
 
                     {/* Откуда узнали о нас */}
                     <FormControl fullWidth sx={{ mb: 2 }} disabled>
                         <InputLabel>Откуда узнали о нас?</InputLabel>
-                        <Select name="heardAboutUs" value={requestData.heardAboutUs}>
+                        <Select name="heardAboutUs" value={requestData?.heardAboutUs}>
                             <MenuItem value="Instagram">Instagram</MenuItem>
                             <MenuItem value="Facebook">Facebook</MenuItem>
                             <MenuItem value="TikTok">TikTok</MenuItem>
@@ -123,8 +147,8 @@ export default function StatusPage() {
                             <MenuItem value="other">Другое</MenuItem>
                         </Select>
                     </FormControl>
-                    {requestData.heardAboutUs === "other" && (
-                        <TextField label="Укажите источник" name="heardAboutUsOther" value={requestData.heardAboutUsOther} fullWidth sx={{ mb: 2 }} />
+                    {requestData?.heardAboutUs === "other" && (
+                        <TextField label="Укажите источник" name="heardAboutUsOther" value={requestData?.heardAboutUsOther} fullWidth sx={{ mb: 2 }} />
                     )}
                     {/*<Typography variant="h6">Загруженные файлы</Typography>*/}
                     {/*<Typography variant="h6">Загруженные файлы</Typography>*/}
@@ -164,7 +188,9 @@ export default function StatusPage() {
                             backgroundColor: 'rgba(255,255,255,0.18)',
                     }}>
                           <p style={{fontWeight: '600', color: '#313c52'}}>Статус зявки:</p>
-                        <span className={`badge ${statusColors[requestData.status]}`}>{requestData.status}</span>
+                        <span className={`badge ${statusColors[requestData?.status || "unknown"]}`}>
+                            {requestData?.status || "Неизвестно"}
+                        </span>
 
                     </Typography>
 

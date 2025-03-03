@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 const STATUS_ENUM = ["В обработке", "В процессе", "Найдена", "Отклонена"] as const;
 type StatusType = (typeof STATUS_ENUM)[number];
 
+
 const RequestSchema = new mongoose.Schema({
     lookingFor: String,
     returnedFromWar: String,
@@ -26,14 +27,12 @@ const RequestSchema = new mongoose.Schema({
     heardAboutUs: String,
     heardAboutUsOther: String,
 
-    // Добавляем поле для хранения ссылок на загруженные файлы
-    // attachments: [{ type: String }], // массив строк (URL файлов)
-
-    // 🟢 СТАТУС ЗАЯВКИ (Меняется только в админке, не в форме)
-    status: { type: String, enum: STATUS_ENUM, default: "В обработке" },
+    // СТАТУС ЗАЯВКИ (Меняется только в админке)
+    status: { type: String as () => StatusType, enum: STATUS_ENUM, default: "В обработке" },
 
     createdAt: { type: Date, default: Date.now },
 });
+
 
 // Экспортируем модель
 export default mongoose.models.Request || mongoose.model("Request", RequestSchema);
