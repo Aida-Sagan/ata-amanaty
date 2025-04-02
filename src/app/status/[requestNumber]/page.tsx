@@ -1,29 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {useParams, useRouter} from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
     Typography,
     Box,
-    Button,
     TextField,
     FormControlLabel,
     Checkbox,
-    FormControl, InputLabel, Select, MenuItem
+    Button
 } from "@mui/material";
 import axios from "axios";
+import { IconAlertSquareRounded, IconChartBubble, IconMail } from "@tabler/icons-react";
+import Image from "next/image";
+import { useLanguage } from "@/lib/LanguageContext";
 
 
 interface RequestData {
     _id: string;
+    lookingFor?: string;
+    returnedFromWar?: string;
     lastName: string;
     firstName: string;
     middleName?: string;
     birthDate: string;
-    birthPlaceCountryRegion: string;
+    birthCountry?: string;
+    birthRegion?: string;
     birthPlaceCity: string;
-    conscriptionDate: string;
-    maritalStatus: string;
+    conscriptionDate?: string;
+    conscriptionPlace?: string;
+    maritalStatus?: string;
     childrenNames?: string;
     relativesListed?: string;
     prisoner: boolean;
@@ -31,25 +37,66 @@ interface RequestData {
     searcherFullName: string;
     phoneNumber: string;
     homeAddress?: string;
+    applicationRegion?: string;
+    applicationCountry?: string;
     email: string;
-    heardAboutUs: string;
+    searchGoal?: string;
+    archiveSearch?: string;
+    archiveDetails?: string;
+    additionalInfo?: string;
+    heardAboutUs?: string;
     heardAboutUsOther?: string;
     status: string;
+    adminComment?: string;
 }
 
-export default function StatusPage() {
-    const router = useRouter(); // Хук для перехода между страницами
+const fieldLabels: Record<keyof RequestData, string> = {
+    _id: "ID",
+    lookingFor: "Кого ищете",
+    returnedFromWar: "Вернулся ли с войны",
+    lastName: "Фамилия",
+    firstName: "Имя",
+    middleName: "Отчество",
+    birthDate: "Дата рождения",
+    birthCountry: "Страна рождения",
+    birthRegion: "Область рождения",
+    birthPlaceCity: "Город/Район рождения",
+    conscriptionDate: "Дата призыва",
+    conscriptionPlace: "Место призыва",
+    maritalStatus: "Семейное положение",
+    childrenNames: "Дети",
+    relativesListed: "Перечислены родственники",
+    prisoner: "Был ли в плену",
+    prisonerInfo: "Где был пленен",
+    searcherFullName: "ФИО заявителя",
+    phoneNumber: "Телефон",
+    homeAddress: "Адрес проживания",
+    applicationRegion: "Регион подачи заявки",
+    applicationCountry: "Страна подачи заявки",
+    email: "Электронная почта",
+    searchGoal: "Цель поиска",
+    archiveSearch: "Архивный поиск",
+    archiveDetails: "Детали архивного поиска",
+    additionalInfo: "Дополнительная информация",
+    heardAboutUs: "Как узнали о нас",
+    heardAboutUsOther: "Уточните источник",
+    status: "Статус",
+    adminComment: "Комментарий администратора"
+};
 
-    const { requestNumber } = useParams(); // Получаем параметр ID заявки
+export default function StatusPage() {
+    const router = useRouter();
+    const { requestNumber } = useParams();
     const [requestData, setRequestData] = useState<RequestData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const { t } = useLanguage();
+
 
     useEffect(() => {
         const fetchRequestData = async () => {
             try {
                 const response = await axios.get(`/api/requests?id=${requestNumber}`);
-
                 if (response.data.success) {
                     setRequestData(response.data.data);
                 } else {
@@ -62,7 +109,6 @@ export default function StatusPage() {
                 setLoading(false);
             }
         };
-
         fetchRequestData();
     }, [requestNumber]);
 
@@ -73,165 +119,62 @@ export default function StatusPage() {
         "Отклонена": "bg-red-lt",
     };
 
-
     if (loading) return <Typography>Загрузка...</Typography>;
     if (error) return <Typography color="error">{error}</Typography>;
 
     return (
-        <Box sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: 4,
-            mt: 4,
-            marginLeft: 2,
-        }}>
-            <Button variant="contained" onClick={() => router.back()}>
-                На главную
-            </Button>
-            <Box
-                sx={{
-                    display: "flex",
-                    gap: 3, // Отступ между ними
-                    textAlign: "center"
-                }}
-            >
-                {/* Левая часть: Форма с заявкой */}
-                <Box
-                    sx={{
-                        flex: 1, // Занимает всю доступную ширину, но делится с другим Box
-                        border: "1px solid #c8d3e1", // Цвет границы
-                        padding: 3,
-                        borderRadius: 2,
-                        typography: "body1",
-                        display: "flex",
-                        flexDirection: "column",
-                        width: "50%", // Ширина бокса
-                        boxShadow: "5px 5px 15px rgba(0, 0, 0, 0.2)",
-                        mb: '25px'
-                    }}
-                >
-
-                <Typography variant="h4" sx={{color: '#313c52', mb: '20px',fontWeight: '700' }}>Заявка №: {requestNumber}</Typography>
-                    <TextField label="Фамилия" name="lastName" value={requestData?.lastName} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Имя" name="firstName" value={requestData?.firstName} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Отчество" name="middleName" value={requestData?.middleName} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Дата рождения" type="date" name="birthDate" value={requestData?.birthDate} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Место рождения (Страна, Область)" name="birthPlaceCountryRegion" value={requestData?.birthPlaceCountryRegion} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Место рождения (Город, Район)" name="birthPlaceCity" value={requestData?.birthPlaceCity} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Дата призыва" type="month" name="conscriptionDate" value={requestData?.conscriptionDate} fullWidth sx={{ mb: 2 }} disabled/>
-
-                    {/* Был ли в плену */}
-                    <FormControlLabel
-                        control={<Checkbox name="prisoner" checked={requestData?.prisoner} disabled />}
-                        label="Был ли в плену?"
-                    />
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 4, px: 2, maxWidth: 1400, mx: "auto" }}>
+            <Box sx={{ display: "flex", gap: 3, alignItems: "flex-start" }}>
+                <Box sx={{ flex: 1, border: "1px solid #c8d3e1", p: 3, borderRadius: 2, boxShadow: 3 }}>
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                        <Image src="/logo.png" alt="Logo" width={200} height={110} onClick={() => router.back()} style={{ cursor: "pointer" }} />
+                    </Box>
+                    <Typography variant="h4" sx={{ mb: 2, textAlign: "center" }}>Заявка №: {requestNumber}</Typography>
+                    {Object.entries(requestData || {}).map(([key, value]) => (
+                        key !== "prisoner" &&
+                        key !== "prisonerInfo" &&
+                        key !== "status" &&
+                        key !== "adminComment" &&
+                        fieldLabels[key as keyof RequestData] && (
+                            <TextField key={key} label={fieldLabels[key as keyof RequestData]} value={value as string} fullWidth sx={{ mb: 2 }} disabled />
+                        )
+                    ))}
+                    <FormControlLabel control={<Checkbox checked={requestData?.prisoner} disabled />} label="Был ли в плену?" />
                     {requestData?.prisoner && (
-                        <TextField label="Где был пленен?" name="prisonerInfo" value={requestData?.prisonerInfo} fullWidth sx={{ mb: 2 }} disabled />
+                        <TextField label="Где был пленен?" value={requestData?.prisonerInfo} fullWidth sx={{ mb: 2 }} disabled />
                     )}
-
-                    <TextField label="ФИО заявителя" name="searcherFullName" value={requestData?.searcherFullName} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Номер телефона" name="phoneNumber" value={requestData?.phoneNumber} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Домашний адрес" name="homeAddress" value={requestData?.homeAddress} fullWidth sx={{ mb: 2 }} disabled/>
-                    <TextField label="Электронная почта" name="email" value={requestData?.email} fullWidth sx={{ mb: 2 }} disabled/>
-
-                    {/* Откуда узнали о нас */}
-                    <FormControl fullWidth sx={{ mb: 2 }} disabled>
-                        <InputLabel>Откуда узнали о нас?</InputLabel>
-                        <Select name="heardAboutUs" value={requestData?.heardAboutUs}>
-                            <MenuItem value="Instagram">Instagram</MenuItem>
-                            <MenuItem value="Facebook">Facebook</MenuItem>
-                            <MenuItem value="TikTok">TikTok</MenuItem>
-                            <MenuItem value="friends">От знакомых</MenuItem>
-                            <MenuItem value="internetSearch">Поиск в интернете</MenuItem>
-                            <MenuItem value="other">Другое</MenuItem>
-                        </Select>
-                    </FormControl>
-                    {requestData?.heardAboutUs === "other" && (
-                        <TextField label="Укажите источник" name="heardAboutUsOther" value={requestData?.heardAboutUsOther} fullWidth sx={{ mb: 2 }} />
-                    )}
-                    {/*<Typography variant="h6">Загруженные файлы</Typography>*/}
-                    {/*<Typography variant="h6">Загруженные файлы</Typography>*/}
-                    {/*{requestData.attachments?.length > 0 ? (*/}
-                    {/*    requestData.attachments.map((fileUrl: string, index: number) => (*/}
-                    {/*        <Box key={index} sx={{ mt: 1 }}>*/}
-                    {/*            <a href={fileUrl} target="_blank" rel="noopener noreferrer">{`Файл ${index + 1}`}</a>*/}
-                    {/*        </Box>*/}
-                    {/*    ))*/}
-                    {/*) : (*/}
-                    {/*    <Typography variant="body2" color="textSecondary">Файлы не загружены</Typography>*/}
-                    {/*)}*/}
-
-
                 </Box>
 
-                {/* Правая часть: Статус заявки */}
-                <Box
-                    sx={{
-                        flex: 0.5,
-                        borderRadius: 2,
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
+                <Box sx={{ width: 400, display: "flex", flexDirection: "column", gap: 2 }}>
+                    <Button variant="contained" fullWidth onClick={() => router.back()}>{t("backToHome")}</Button>
 
-                    }}
-                >
-                    <Typography
-                        variant="h6"
-                        align="center"
-                        sx={{
-                            mb: 2 ,
-                            border: '1px solid #0f172a',
-                            padding: '35px',
-                            boxShadow: 3,
-                            borderRadius: '20px',
-                            backgroundColor: 'rgba(255,255,255,0.18)',
-                    }}>
-                          <p style={{fontWeight: '600', color: '#313c52'}}>Статус зявки:</p>
-                        <span className={`badge ${statusColors[requestData?.status || "unknown"]}`}>
-                            {requestData?.status || "Неизвестно"}
-                        </span>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 2, border: "1px solid #0f172a", borderRadius: 2, boxShadow: 2 }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                            <IconChartBubble stroke={2} style={{ marginRight: "8px" }} />{t('statusTitle')}:
+                        </Typography>
+                        <span className={`badge ${statusColors[requestData?.status || "unknown"]}`}>{requestData?.status || "Неизвестно"}</span>
+                    </Box>
 
-                    </Typography>
-
-
-
-                    <Typography
-                        variant="h6"
-                        align="center"
-                        sx={{
-                            border: '1px solid #0f172a',
-                            padding: '15px',
-                            boxShadow: 3,
-                            borderRadius: '20px',
-                            fontSize: '14px',
-                            backgroundColor: 'rgba(255,255,255,0.18)',
+                    <Box sx={{ p: 2, border: "1px solid #575C69", boxShadow: 2, borderRadius: 2, backgroundColor: "#f9fafb", mt:7 }}>
+                        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold", color: "#062645" }}>
+                            <IconMail stroke={2} style={{ marginRight: "8px" }} />{t("adminComment")}
+                        </Typography>
+                        <Typography variant="body2" sx={{ whiteSpace: "pre-line",wordBreak: "break-word",
+                            overflowWrap: "break-word",
                         }}>
-                        <p style={{fontWeight: '600', color: '#313c52'}}>По всем вопросам писать на номер:</p>
-                        <p style={{color: '#313c52'}}>8 777 777 77 77</p>
-                    </Typography>
-
+                            {requestData?.adminComment || t("noAdminComment")}
+                        </Typography>
+                    </Box>
+                    <Box sx={{ p: 2, border: "1px solid #0f172a", borderRadius: 2, boxShadow: 2, backgroundColor: "rgba(255,255,255,0.18)" }}>
+                        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold", color: "#004991" }}>
+                            <IconAlertSquareRounded stroke={2} style={{ marginRight: "8px" }} />{t("questionsContact")}
+                        </Typography>
+                        <Typography variant="body2">Алия Сагимбаева — 8-701-999-78-20</Typography>
+                        <Typography variant="body2">Марфуза Сулейменова — 8-776-828-45-35</Typography>
+                        <Typography variant="body2">Закиева Ардак — +7 (776) 828-45-34</Typography>
+                    </Box>
                 </Box>
-
-
-                {/* Правая часть: кнопка скачивания заявки */}
-                <Box
-                    sx={{
-
-                        borderRadius: 2,
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-
-                    }}
-                >
-                    <Button variant="contained" onClick={() => router.back()} sx={{ mb: 2 }} disabled>
-                        Скачать заявку
-                    </Button>
-                </Box>
-
             </Box>
-
         </Box>
     );
 }

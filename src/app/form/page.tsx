@@ -1,282 +1,366 @@
-"use client";
+    "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
-import { TextField, Button, MenuItem, FormControl, InputLabel, Select, Checkbox, FormControlLabel, Typography, Container, Box } from "@mui/material";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import axios from "axios";
-import Image from "next/image";
-
-const schema: yup.ObjectSchema<FormDataType> = yup.object().shape({
-    lookingFor: yup.string().required("Выберите, кого ищете"),
-    returnedFromWar: yup.string().required("Выберите, вернулся ли человек с войны"),
-    lastName: yup.string().required("Фамилия обязательна"),
-    firstName: yup.string().required("Имя обязательно"),
-    middleName: yup.string().optional(),
-    birthDate: yup.string().required("Дата рождения обязательна"),
-    birthPlaceCountryRegion: yup.string().required("Укажите место рождения (страна, область)"),
-    birthPlaceCity: yup.string().required("Укажите место рождения (город, район)"),
-    conscriptionDate: yup.string().required("Введите дату призыва"),
-    maritalStatus: yup.string().required("Выберите семейный статус"),
-    childrenNames: yup.string().optional(),
-    relativesListed: yup.string().optional(),
-    prisoner: yup.boolean().default(false),
-    prisonerInfo: yup.string().optional(),
-    searcherFullName: yup.string().required("ФИО обязательно"),
-    phoneNumber: yup.string().required("Номер телефона обязателен"),
-    homeAddress: yup.string().optional(),
-    email: yup.string().email("Введите корректный email").required("Email обязателен"),
-    heardAboutUs: yup.string().required("Выберите источник"),
-    heardAboutUsOther: yup.string().optional(),
-});
+    import { useState } from "react";
+    import { useRouter } from "next/navigation";
+    import { useForm, Controller } from "react-hook-form";
+    import {
+        TextField,
+        Button,
+        MenuItem,
+        FormControl,
+        InputLabel,
+        Select,
+        Checkbox,
+        FormControlLabel,
+        Typography,
+        Container,
+        Box,
+        Divider,
+    } from "@mui/material";
+    import { yupResolver } from "@hookform/resolvers/yup";
+    import * as yup from "yup";
+    import axios from "axios";
+    import Image from "next/image";
+    import { useLanguage } from "@/lib/LanguageContext";
+    import countries from "@/lib/data/countries-ru.json";
 
 
-interface FormDataType {
-    lookingFor: string;
-    returnedFromWar: string;
-    lastName: string;
-    firstName: string;
-    middleName?: string;
-    birthDate: string;
-    birthPlaceCountryRegion: string;
-    birthPlaceCity: string;
-    conscriptionDate: string;
-    maritalStatus: string;
-    childrenNames?: string;
-    relativesListed?: string;
-    prisoner: boolean;
-    prisonerInfo?: string;
-    searcherFullName: string;
-    phoneNumber: string;
-    homeAddress?: string;
-    email: string;
-    heardAboutUs: string;
-    heardAboutUsOther?: string;
-}
 
+    // Типизация
+    interface FormDataType {
+        lookingFor?: string;
+        returnedFromWar?: string;
+        lastName: string;
+        firstName: string;
+        middleName?: string;
+        birthDate: string;
+        birthCountry?: string;
+        birthRegion?: string;
+        birthPlaceCity: string;
+        conscriptionDate?: string;
+        conscriptionPlace?: string;
+        maritalStatus?: string;
+        childrenNames?: string;
+        relativesListed?: string;
+        applicationRegion: string;
+        applicationCountry?: string;
+        searchGoal?: string;
+        archiveSearch?: string;
+        archiveDetails?: string;
+        additionalInfo?: string;
+        prisoner: boolean;
+        prisonerInfo?: string;
+        searcherFullName: string;
+        phoneNumber: string;
+        homeAddress?: string;
+        email: string;
+        heardAboutUs: string;
+        heardAboutUsOther?: string;
+    }
 
-export default function FormPage() {
-    const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const { control, handleSubmit, register, watch, formState: { errors } } = useForm<FormDataType>({
-        resolver: yupResolver(schema),
-        defaultValues: {
-            lookingFor: "",
-            returnedFromWar: "",
-            lastName: "",
-            firstName: "",
-            middleName: "",
-            birthDate: "",
-            birthPlaceCountryRegion: "",
-            birthPlaceCity: "",
-            conscriptionDate: "",
-            maritalStatus: "",
-            childrenNames: "",
-            relativesListed: "",
-            prisoner: false,
-            prisonerInfo: "",
-            searcherFullName: "",
-            phoneNumber: "",
-            homeAddress: "",
-            email: "",
-            heardAboutUs: "",
-            heardAboutUsOther: "",
-        },
+    const schema = yup.object().shape({
+        lookingFor: yup.string().optional(),
+        returnedFromWar: yup.string().optional(),
+        lastName: yup.string().required("Фамилия обязательна"),
+        firstName: yup.string().required("Имя обязательно"),
+        middleName: yup.string().optional(),
+        birthDate: yup.string().required("Дата рождения обязательна"),
+        birthCountry: yup.string().optional(),
+        birthRegion: yup.string().optional(),
+        birthPlaceCity: yup.string().required("Укажите место рождения (город, район)"),
+        conscriptionDate: yup.string().optional(),
+        conscriptionPlace: yup.string().optional(),
+        maritalStatus: yup.string().optional(),
+        childrenNames: yup.string().optional(),
+        relativesListed: yup.string().optional(),
+        applicationRegion: yup.string().required("Выберите область"),
+        applicationCountry: yup.string().optional(),
+        searchGoal: yup.string().optional(),
+        archiveSearch: yup.string().optional(),
+        archiveDetails: yup.string().optional(),
+        additionalInfo: yup.string().optional(),
+        prisoner: yup.boolean().default(false),
+        prisonerInfo: yup.string().optional(),
+        searcherFullName: yup.string().required("ФИО обязательно"),
+        phoneNumber: yup.string().required("Номер телефона обязателен"),
+        homeAddress: yup.string().optional(),
+        email: yup.string().email("Введите корректный email").required("Email обязателен"),
+        heardAboutUs: yup.string().required("Выберите источник"),
+        heardAboutUsOther: yup.string().optional(),
+
     });
 
-    const onSubmit = async (data: FormDataType) => {
-        setLoading(true);
-        try {
-            const response = await axios.post("/api/requests", data);
-            const requestId = response.data.data._id; // Получаем ID заявки
+    export const regions = [
+        "Абайская область",
+        "Актюбинская область",
+        "Алматинская область",
+        "Атырауская область",
+        "Восточно-Казахстанская область",
+        "Жамбылская область",
+        "Жетысуская область",
+        "Западно-Казахстанская область",
+        "Карагандинская область",
+        "Костанайская область",
+        "Кызылординская область",
+        "Мангистауская область",
+        "Павлодарская область",
+        "Северо-Казахстанская область",
+        "Туркестанская область",
+        "Улытауская область",
+        "Шымкент (город республиканского значения)",
+        "Астана (город республиканского значения)",
+        "Алматы (город республиканского значения)",
+        "Я не из Казахстана"
+    ];
 
-            // Сохраняем ID заявки в localStorage
-            localStorage.setItem("requestId", requestId);
 
-            // Перенаправляем пользователя на страницу `/verify`
-            router.push("/verify");
-        } catch (error) {
-            console.error("Ошибка:", error);
-            alert("Ошибка отправки заявки.");
-        }
-        setLoading(false);
-    };
+    export default function FormPage() {
+        const router = useRouter();
+        const [loading, setLoading] = useState(false);
+        const { t } = useLanguage();
 
+        const {
+            control,
+            handleSubmit,
+            register,
+            watch,
+            formState: { errors },
+        } = useForm<FormDataType>({
+            resolver: yupResolver(schema),
+            defaultValues: {
+                lookingFor: "",
+                returnedFromWar: "",
+                lastName: "",
+                firstName: "",
+                middleName: "",
+                birthDate: "",
+                birthCountry: "",
+                birthRegion: "",
+                birthPlaceCity: "",
+                conscriptionDate: "",
+                conscriptionPlace: "",
+                maritalStatus: "",
+                childrenNames: "",
+                relativesListed: "",
+                applicationRegion: "",
+                applicationCountry: "",
+                searchGoal: "",
+                archiveSearch: "",
+                archiveDetails: "",
+                additionalInfo: "",
+                prisoner: false,
+                prisonerInfo: "",
+                searcherFullName: "",
+                phoneNumber: "",
+                homeAddress: "",
+                email: "",
+                heardAboutUs: "",
+                heardAboutUsOther: "",
+            },
+        });
 
-    return (
-        <Box
-            sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: 4,
-            mt: 4,
-            marginLeft: 2,
-        }}>
-            <Button variant="contained" onClick={() => router.back()} >
-                На главную
-            </Button>
+        const onSubmit = async (data: FormDataType) => {
+            setLoading(true);
+            try {
+                const response = await axios.post("/api/requests", data);
+                const requestId = response.data.data._id;
+                localStorage.setItem("requestId", requestId);
+                router.push("/verify");
+            } catch (error) {
+                console.error("Ошибка отправки:", error);
+                alert("Ошибка отправки заявки.");
+            } finally {
+                setLoading(false);
+            }
+        };
 
-            <Container maxWidth="md"
-                       sx={{
-                           flex: 1, // Занимает всю доступную ширину, но делится с другим Box
-                           border: "1px solid #c8d3e1", // Цвет границы
-                           padding: 3,
-                           borderRadius: 2,
-                           typography: "body1",
-                           boxShadow: "5px 5px 15px rgba(0, 0, 0, 0.2)",
-                           mb: '4rem'
-                       }}
-            >
-                <Box sx={{ display: "flex", justifyContent: "center" }}>
+        return (
+            <Container maxWidth="md" sx={{ mt: 4, mb: 4, p: 3, border: "1px solid #c8d3e1", borderRadius: 2, boxShadow: 3, position: "relative" }}>
+                <Button
+                    variant="contained"
+                    onClick={() => router.back()}
+                    sx={{ position: "absolute", top: 16, left: 16 }}
+                >
+                    {t("back")}
+                </Button>
+                <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
                     <Image src="/logo.png" alt="Logo" width={200} height={110} />
                 </Box>
-
-                <Typography
-                    variant="h4"
-                    align="center"
-                    gutterBottom
-                    sx={{
-                        fontFamily: 'Playfair Display, serif',
-                        fontWeight: 'bold',
-                        letterSpacing: '1px',
-                        color: '#333'
-                    }}
-                >
-                    Заполните форму
+                <Typography variant="h4" align="center" gutterBottom sx={{ fontFamily: "Playfair Display, serif", fontWeight: "bold", color: "#333" }}>
+                    {t("formTitle")}
                 </Typography>
+                <Divider sx={{ mb: 2 }} />
 
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <Box display="flex" flexDirection="column" gap={2}>
+                <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ display: "flex", flexDirection: "column", gap: 2, maxHeight: "70vh", overflowY: "auto", pr: 1 }}>
 
-                        {/* Кого ищете */}
-                        <FormControl fullWidth>
-                            <InputLabel>Кого ищете?</InputLabel>
-                            <Controller
-                                name="lookingFor"
-                                control={control}
-                                render={({ field }) => (
-                                    <Select {...field}>
-                                        <MenuItem value="Дедушку">Дедушку</MenuItem>
-                                        <MenuItem value="Бабушку">Бабушку</MenuItem>
-                                    </Select>
-                                )}
-                            />
-                        </FormControl>
-                        {errors.lookingFor && <Typography color="error">{errors.lookingFor.message}</Typography>}
-
-                        {/* Вернулся с войны */}
-                        <FormControl fullWidth>
-                            <InputLabel>Вернулся ли с войны?</InputLabel>
-                            <Controller
-                                name="returnedFromWar"
-                                control={control}
-                                render={({ field }) => (
-                                    <Select {...field}>
-                                        <MenuItem value="Вернулся">Вернулся</MenuItem>
-                                        <MenuItem value="Не вернулся">Не вернулся</MenuItem>
-                                    </Select>
-                                )}
-                            />
-                        </FormControl>
-
-                        {/* ФИО */}
-                        <TextField label="Фамилия" {...register("lastName")} fullWidth />
-                        <TextField label="Имя" {...register("firstName")} fullWidth />
-                        <TextField label="Отчество" {...register("middleName")} fullWidth />
-
-                        {/* Дата рождения */}
-                        <TextField
-                            label="Дата рождения"
-                            type="date"
-                            InputLabelProps={{ shrink: true }}
-                            {...register("birthDate")}
-                            fullWidth
-                            inputProps={{
-                                min: "1850-01-01",
-                                max: "1950-12-31"
-                            }}
-                            helperText="Выберите дату в период 1850-1950 гг."
+                    <FormControl fullWidth>
+                        <InputLabel>{t("lookingFor")}</InputLabel>
+                        <Controller
+                            name="lookingFor"
+                            control={control}
+                            render={({ field }) => (
+                                <Select {...field} label={t("lookingFor")}>
+                                    <MenuItem value="Дедушку">{t("grandfather")}</MenuItem>
+                                    <MenuItem value="Бабушку">{t("grandmother")}</MenuItem>
+                                    <MenuItem value="Родственника">{t("relative")}</MenuItem>
+                                    <MenuItem value="Другое">{t("otherPerson")}</MenuItem>
+                                </Select>
+                            )}
                         />
+                    </FormControl>
 
-                        {/* Место рождения */}
-                        <TextField label="Страна и область" {...register("birthPlaceCountryRegion")} fullWidth />
-                        <TextField label="Город, район, населенный пункт" {...register("birthPlaceCity")} fullWidth />
-
-                        {/* Дата призыва */}
-                        <TextField
-                            label="Дата призыва"
-                            type="month"
-                            InputLabelProps={{ shrink: true }}
-                            {...register("conscriptionDate")}
-                            fullWidth
-                            inputProps={{
-                                min: "1930-01",
-                                max: "1950-12"
-                            }}
-                            helperText="Выберите дату в период 1930-1950 гг."
+                    <FormControl fullWidth>
+                        <InputLabel>{t("returnedFromWar")}</InputLabel>
+                        <Controller
+                            name="returnedFromWar"
+                            control={control}
+                            render={({ field }) => (
+                                <Select {...field} label={t("returnedFromWar")}>
+                                    <MenuItem value="Вернулся">{t("returned")}</MenuItem>
+                                    <MenuItem value="Не вернулся">{t("notReturned")}</MenuItem>
+                                </Select>
+                            )}
                         />
+                    </FormControl>
 
-                        {/* Семейный статус */}
-                        <FormControl fullWidth>
-                            <InputLabel>Семейный статус</InputLabel>
-                            <Controller
-                                name="maritalStatus"
-                                control={control}
-                                render={({ field }) => (
-                                    <Select {...field}>
-                                        <MenuItem value="married">Женат / Замужем</MenuItem>
-                                        <MenuItem value="divorced">Разведен(-а)</MenuItem>
-                                        <MenuItem value="neverMarried">Никогда не состоял(-а) в браке</MenuItem>
-                                        <MenuItem value="widowWidower">Вдова / Вдовец</MenuItem>
-                                    </Select>
-                                )}
-                            />
-                        </FormControl>
+                    <Divider textAlign="left">{t("personData")}</Divider>
 
-                        {/* Количество детей */}
-                        <TextField label="Количество детей и их имена" {...register("childrenNames")} fullWidth />
+                    <TextField label={t("lastName")} {...register("lastName")} helperText={errors.lastName?.message} error={!!errors.lastName} fullWidth />
+                    <TextField label={t("firstName")} {...register("firstName")} helperText={errors.firstName?.message} error={!!errors.firstName} fullWidth />
+                    <TextField label={t("middleName")} {...register("middleName")} fullWidth />
+                    <TextField label={t("birthDate")} {...register("birthDate")} helperText={errors.birthDate?.message} error={!!errors.birthDate} fullWidth />
+                    <TextField label={t("birthCountry")} {...register("birthCountry")} fullWidth />
+                    <TextField label={t("birthRegion")} {...register("birthRegion")} fullWidth />
+                    <TextField label={t("birthPlaceCity")} {...register("birthPlaceCity")} helperText={errors.birthPlaceCity?.message} fullWidth />
+                    <TextField label={t("conscriptionDate")} {...register("conscriptionDate")} fullWidth />
+                    <TextField label={t("conscriptionPlace")} {...register("conscriptionPlace")} fullWidth />
 
-                        {/* Бывший в плену */}
-                        <FormControlLabel control={<Checkbox {...register("prisoner")} />} label="Был ли в плену?" />
-                        {watch("prisoner") && <TextField label="Где был пленен?" {...register("prisonerInfo")} fullWidth />}
+                    <Divider textAlign="left">{t("additionalInfoTitle")}</Divider>
 
-                        {/* Контактная информация */}
-                        <TextField label="ФИО заявителя" {...register("searcherFullName")} fullWidth />
-                        <TextField label="Номер телефона" {...register("phoneNumber")} fullWidth />
-                        <TextField label="Домашний адрес" {...register("homeAddress")} fullWidth />
-                        <TextField label="Электронная почта" {...register("email")} fullWidth />
+                    <FormControl fullWidth>
+                        <InputLabel>{t("maritalStatus")}</InputLabel>
+                        <Controller
+                            name="maritalStatus"
+                            control={control}
+                            render={({ field }) => (
+                                <Select {...field} label={t("maritalStatus")}>
+                                    <MenuItem value="Женат / Замужем">{t("married")}</MenuItem>
+                                    <MenuItem value="Разведен(-а)">{t("divorced")}</MenuItem>
+                                    <MenuItem value="Никогда не состоял(-а) в браке">{t("single")}</MenuItem>
+                                    <MenuItem value="Вдова / Вдовец">{t("widow")}</MenuItem>
+                                </Select>
+                            )}
+                        />
+                    </FormControl>
 
-                        {/* Откуда узнали о нас */}
-                        <FormControl fullWidth>
-                            <InputLabel>Откуда узнали о нас?</InputLabel>
-                            <Controller
-                                name="heardAboutUs"
-                                control={control}
-                                render={({ field }) => (
-                                    <Select {...field}>
-                                        <MenuItem value="Instagram">Instagram</MenuItem>
-                                        <MenuItem value="Facebook">Facebook</MenuItem>
-                                        <MenuItem value="TikTok">TikTok</MenuItem>
-                                        <MenuItem value="friends">От знакомых</MenuItem>
-                                        <MenuItem value="internetSearch">Поиск в интернете</MenuItem>
-                                        <MenuItem value="other">Другое</MenuItem>
-                                    </Select>
-                                )}
-                            />
-                        </FormControl>
-                        {watch("heardAboutUs") === "other" && <TextField label="Укажите источник" {...register("heardAboutUsOther")} fullWidth />}
+                    <TextField label={t("relativesListed")} {...register("relativesListed")} fullWidth />
+                    <TextField label={t("childrenNames")} {...register("childrenNames")} fullWidth />
+                    <FormControlLabel control={<Checkbox {...register("prisoner")} />} label={t("prisoner")} />
+                    {watch("prisoner") && (
+                        <TextField label={t("prisonerInfo")} {...register("prisonerInfo")} fullWidth />
+                    )}
 
-                        {/* Кнопка отправки */}
-                        <Button type="submit" variant="contained" color="primary" disabled={loading}>
-                            {loading ? "Отправка..." : "Отправить"}
-                        </Button>
-                    </Box>
-                </form>
+                    <Divider textAlign="left">{t("contactData")}</Divider>
+
+                    <TextField label={t("searcherFullName")} {...register("searcherFullName")} helperText={errors.searcherFullName?.message} error={!!errors.searcherFullName} fullWidth />
+                    <TextField label={t("phoneNumber")} {...register("phoneNumber")} helperText={errors.phoneNumber?.message} error={!!errors.phoneNumber} fullWidth />
+                    <TextField label={t("homeAddress")} {...register("homeAddress")} fullWidth />
+                    <FormControl fullWidth error={!!errors.applicationRegion}>
+                        <InputLabel>{t("applicationRegion")}</InputLabel>
+                        <Controller
+                            name="applicationRegion"
+                            control={control}
+                            render={({ field }) => (
+                                <Select {...field} label={t("applicationRegion")}>
+                                    {regions.map((region) => (
+                                        <MenuItem key={region} value={region}>
+                                            {region}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            )}
+                        />
+                        {errors.applicationRegion && (
+                            <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                                {errors.applicationRegion.message}
+                            </Typography>
+                        )}
+                    </FormControl>
+
+                    <FormControl fullWidth>
+                        <InputLabel>{t("applicationCountry")}</InputLabel>
+                        <Controller
+                            name="applicationCountry"
+                            control={control}
+                            render={({ field }) => (
+                                <Select {...field} label={t("applicationCountry")}>
+                                    {countries.map((country) => (
+                                        <MenuItem key={country} value={country}>
+                                            {country}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            )}
+                        />
+                    </FormControl>
+
+                    <TextField label={t("email")} {...register("email")} helperText={errors.email?.message} error={!!errors.email} fullWidth />
+
+                    <Divider textAlign="left">{t("searchGoalTitle")}</Divider>
+
+                    <FormControl fullWidth>
+                        <InputLabel>{t("searchGoal")}</InputLabel>
+                        <Controller
+                            name="searchGoal"
+                            control={control}
+                            render={({ field }) => (
+                                <Select {...field} label={t("searchGoal")}>
+                                    <MenuItem value="Определение места захоронения">{t("determineGrave")}</MenuItem>
+                                    <MenuItem value="Уточнение места захоронения">{t("clarifyGrave")}</MenuItem>
+                                    <MenuItem value="Определить судьбу солдата">{t("determineFate")}</MenuItem>
+                                    <MenuItem value="Определить боевой путь">{t("determinePath")}</MenuItem>
+                                </Select>
+                            )}
+                        />
+                    </FormControl>
+
+                    <TextField label={t("archiveSearch")} {...register("archiveSearch")} fullWidth />
+                    <TextField label={t("archiveDetails")} {...register("archiveDetails")} fullWidth multiline rows={3} />
+                    <TextField label={t("additionalInfo")} {...register("additionalInfo")} fullWidth multiline rows={3} />
+
+                    <Divider textAlign="left">{t("infoSourceTitle")}</Divider>
+
+                    <FormControl fullWidth error={!!errors.heardAboutUs}>
+                        <InputLabel>{t("heardAboutUs")}</InputLabel>
+                        <Controller
+                            name="heardAboutUs"
+                            control={control}
+                            render={({ field }) => (
+                                <Select {...field} label={t("heardAboutUs")}>
+                                    <MenuItem value="Instagram">{t("instagram")}</MenuItem>
+                                    <MenuItem value="Facebook">{t("facebook")}</MenuItem>
+                                    <MenuItem value="TikTok">{t("tiktok")}</MenuItem>
+                                    <MenuItem value="friends">{t("friends")}</MenuItem>
+                                    <MenuItem value="internetSearch">{t("internetSearch")}</MenuItem>
+                                    <MenuItem value="other">{t("otherVariant")}</MenuItem>
+                                </Select>
+                            )}
+                        />
+                        {errors.heardAboutUs && (
+                            <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                                {errors.heardAboutUs.message}
+                            </Typography>
+                        )}
+                    </FormControl>
+
+                    {watch("heardAboutUs") === "other" && (
+                        <TextField label={t("heardAboutUsOther")} {...register("heardAboutUsOther")} fullWidth />
+                    )}
+                    <Button type="submit" variant="contained" color="primary" disabled={loading} sx={{ mt: 2 }}>
+                            {loading ? t("sending") : t("submitApplication")}
+                    </Button>
+                </Box>
             </Container>
-        </Box>
 
-    );
-}
+        );
+    }

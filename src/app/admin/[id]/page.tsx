@@ -1,26 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {useParams, useRouter} from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
-    Container, Typography, TextField,Modal, Button, Box, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox
+    Container, Typography, TextField, Modal, Button, Box, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox
 } from "@mui/material";
 import { IconNotes, IconAlertSquareRounded } from '@tabler/icons-react';
 import axios from "axios";
 import StatusChangeAlert from "@/components/alert";
 import { SelectChangeEvent } from "@mui/material";
-
+import Image from "next/image";
 
 interface RequestData {
     _id: string;
+    lookingFor?: string;
+    returnedFromWar?: string;
     lastName: string;
     firstName: string;
     middleName?: string;
     birthDate: string;
-    birthPlaceCountryRegion: string;
+    birthCountry?: string;
+    birthRegion?: string;
     birthPlaceCity: string;
-    conscriptionDate: string;
-    maritalStatus: string;
+    conscriptionDate?: string;
+    conscriptionPlace?: string;
+    maritalStatus?: string;
     childrenNames?: string;
     relativesListed?: string;
     prisoner: boolean;
@@ -28,12 +32,18 @@ interface RequestData {
     searcherFullName: string;
     phoneNumber: string;
     homeAddress?: string;
+    applicationRegion?: string;
+    applicationCountry?: string;
     email: string;
+    searchGoal?: string;
+    archiveSearch?: string;
+    archiveDetails?: string;
+    additionalInfo?: string;
     heardAboutUs: string;
     heardAboutUsOther?: string;
     status: string;
+    adminComment?: string; // ✅ Добавь это поле
 }
-
 
 export default function AdminRequestPage() {
     const router = useRouter();
@@ -42,8 +52,7 @@ export default function AdminRequestPage() {
     const [loading, setLoading] = useState(true);
     const [showAlert, setShowAlert] = useState(false);
     const [status, setStatus] = useState("");
-    const [openModal, setOpenModal] = useState(false); // Состояние модального окна
-
+    const [openModal, setOpenModal] = useState(false);
 
     useEffect(() => {
         axios.get(`/api/requests?id=${id}`)
@@ -72,18 +81,20 @@ export default function AdminRequestPage() {
         }
     };
 
-
     const handleSave = async () => {
         try {
-            await axios.put(`/api/requests`, { id, ...requestData });
-            setOpenModal(true); // Показываем модальное окно
+            const response = await axios.put(`/api/requests`, { id, ...requestData });
+            setRequestData(response.data.data);
+            setOpenModal(true);
         } catch (error) {
             console.error("Ошибка при сохранении данных:", error);
         }
     };
+
+
     const handleCloseModal = () => {
-        setOpenModal(false);  // Закрываем модалку
-        router.push("/admin"); // Переходим в админ-панель
+        setOpenModal(false);
+        router.push("/admin");
     };
 
     const handleUpdateStatus = async (event: SelectChangeEvent) => {
@@ -92,7 +103,7 @@ export default function AdminRequestPage() {
             await axios.put(`/api/requests`, { id, status: newStatus });
 
             setStatus(newStatus);
-            setShowAlert(true); // Показываем алерт сразу
+            setShowAlert(true);
             setRequestData(prev => (prev ? { ...prev, status: newStatus } : prev));
 
             setTimeout(() => {
@@ -103,7 +114,6 @@ export default function AdminRequestPage() {
         }
     };
 
-
     const statusColors: Record<string, string> = {
         "В обработке": "bg-yellow-lt",
         "В процессе": "bg-blue-lt",
@@ -111,80 +121,55 @@ export default function AdminRequestPage() {
         "Отклонена": "bg-red-lt",
     };
 
-
     if (loading) {
         return <Typography sx={{ mt: 4, fontSize: "1.2rem" }}>Загрузка...</Typography>;
     }
 
-
     return (
-
-        <Container maxWidth="lg" >
+        <Container maxWidth="lg">
             {showAlert && <StatusChangeAlert newStatus={status} />}
-            <Box
-                sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    gap: 4,
-                    mt: 4,
-                    marginLeft: 2,
-                }}
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 4, mt: 4, marginLeft: 2 }}>
 
-            >
-                <Button variant="contained" onClick={() => router.back()} sx={{ mb: 2 }}>
-                    Назад
-                </Button>
-                {/* Левая часть: Форма с заявкой */}
-                <Box
-                    sx={{
-                        flex: 1, // Занимает всю доступную ширину, но делится с другим Box
-                        border: "1px solid #c8d3e1", // Цвет границы
-                        padding: 3,
-                        borderRadius: 2,
-                        typography: "body1",
-                        display: "flex",
-                        flexDirection: "column",
-                        width: "50%", // Ширина бокса
-                        boxShadow: "5px 5px 15px rgba(0, 0, 0, 0.2)",
-                        mb: '25px',
-                    }}
-                >
-
-                    <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+                <Box sx={{ flex: 1, border: "1px solid #c8d3e1", padding: 3, borderRadius: 2, typography: "body1", display: "flex", flexDirection: "column", width: "50%", boxShadow: "5px 5px 15px rgba(0, 0, 0, 0.2)", mb: '25px' }}>
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                        <Image src="/logo.png" alt="Logo" width={200} height={110} />
+                    </Box>
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold",  }}>
                         <IconNotes stroke={2} size={40} />
                         Заявка под номером: {requestData?._id}
-                        <div>
+                        <div style={{display: "flex", justifyContent: "center", alignItems: "center", gap: 4}}>
                             <span className={`badge ${statusColors[requestData?.status || ""]}`}>{requestData?.status}</span>
                         </div>
                     </Typography>
 
-
-                    <TextField label="Фамилия" name="lastName" value={requestData?.lastName} onChange={handleChange}
-                               fullWidth sx={{mb: 2}}/>
-                    <TextField label="Имя" name="firstName" value={requestData?.firstName} onChange={handleChange}
-                               fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Кого ищут" name="lookingFor" value={requestData?.lookingFor || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Вернулся ли с войны" name="returnedFromWar" value={requestData?.returnedFromWar || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Фамилия" name="lastName" value={requestData?.lastName} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Имя" name="firstName" value={requestData?.firstName} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                     <TextField label="Отчество" name="middleName" value={requestData?.middleName} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Дата рождения" type="date" name="birthDate" value={requestData?.birthDate} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Место рождения (Страна, Область)" name="birthPlaceCountryRegion" value={requestData?.birthPlaceCountryRegion} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Место рождения (Город, Район)" name="birthPlaceCity" value={requestData?.birthPlaceCity} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Дата призыва" type="month" name="conscriptionDate" value={requestData?.conscriptionDate} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-
-                    {/* Был ли в плену */}
-                    <FormControlLabel
-                        control={<Checkbox name="prisoner" checked={requestData?.prisoner} onChange={handleCheckboxChange} />}
-                        label="Был ли в плену?"
-                    />
+                    <TextField  name="birthDate" value={requestData?.birthDate || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Страна рождения" name="birthCountry" value={requestData?.birthCountry || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Область рождения" name="birthRegion" value={requestData?.birthRegion || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Город, район" name="birthPlaceCity" value={requestData?.birthPlaceCity} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Дата призыва" name="conscriptionDate" value={requestData?.conscriptionDate || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Место призыва" name="conscriptionPlace" value={requestData?.conscriptionPlace || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Семейный статус" name="maritalStatus" value={requestData?.maritalStatus || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Имена родителей, родственников, жены, сестер, братьев" name="relativesListed" value={requestData?.relativesListed || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Дети и их имена" name="childrenNames" value={requestData?.childrenNames || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <FormControlLabel control={<Checkbox name="prisoner" checked={requestData?.prisoner || false} onChange={handleCheckboxChange} />} label="Был ли в плену?" />
                     {requestData?.prisoner && (
                         <TextField label="Где был пленен?" name="prisonerInfo" value={requestData?.prisonerInfo} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                     )}
-
                     <TextField label="ФИО заявителя" name="searcherFullName" value={requestData?.searcherFullName} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                     <TextField label="Номер телефона" name="phoneNumber" value={requestData?.phoneNumber} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Домашний адрес" name="homeAddress" value={requestData?.homeAddress} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Домашний адрес" name="homeAddress" value={requestData?.homeAddress || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Область заявителя" name="applicationRegion" value={requestData?.applicationRegion || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Страна подачи заявки" name="applicationCountry" value={requestData?.applicationCountry || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                     <TextField label="Электронная почта" name="email" value={requestData?.email} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-
-                    {/* Откуда узнали о нас */}
+                    <TextField label="Цель поиска" name="searchGoal" value={requestData?.searchGoal || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Искали ли в архивах?" name="archiveSearch" value={requestData?.archiveSearch || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Какие данные найдены" name="archiveDetails" value={requestData?.archiveDetails || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField label="Дополнительная информация" name="additionalInfo" value={requestData?.additionalInfo || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                     <FormControl fullWidth sx={{ mb: 2 }}>
                         <InputLabel>Откуда узнали о нас?</InputLabel>
                         <Select name="heardAboutUs" value={requestData?.heardAboutUs || ""} onChange={handleSelectChange}>
@@ -195,78 +180,64 @@ export default function AdminRequestPage() {
                             <MenuItem value="internetSearch">Поиск в интернете</MenuItem>
                             <MenuItem value="other">Другое</MenuItem>
                         </Select>
-
                     </FormControl>
                     {requestData?.heardAboutUs === "other" && (
-                        <TextField label="Укажите источник" name="heardAboutUsOther" value={requestData?.heardAboutUsOther} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                        <TextField label="Укажите источник" name="heardAboutUsOther" value={requestData?.heardAboutUsOther || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                     )}
-
-                    {/*<Typography variant="h6">Загруженные файлы</Typography>*/}
-                    {/*{requestData.attachments?.length > 0 ? (*/}
-                    {/*    requestData.attachments.map((fileUrl: string, index: number) => (*/}
-                    {/*        <Box key={index} sx={{ mt: 1 }}>*/}
-                    {/*            <a href={fileUrl} target="_blank" rel="noopener noreferrer">{`Файл ${index + 1}`}</a>*/}
-                    {/*        </Box>*/}
-                    {/*    ))*/}
-                    {/*) : (*/}
-                    {/*    <Typography variant="body2" color="textSecondary">Файлы не загружены</Typography>*/}
-                    {/*)}*/}
-
                 </Box>
 
-                {/* Правая часть: Статус заявки */}
-                <Box
-                    sx={{
-                        flex: 0.5,
-                        border: '1px solid #575C69',
-                        padding: '35px',
-                        boxShadow: 3,
-                        borderRadius: '20px',
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center"
-                    }}
-                >
-                    <Typography variant="h6" align="center" sx={{ mb: 2, fontWeight: 'bold', color: '#b88943' }}>
-                        <IconAlertSquareRounded stroke={2} />
-                        Статус заявки
-                    </Typography>
-
-                    {/* Выпадающий список для изменения статуса */}
-                    <FormControl fullWidth sx={{ mb: 2 }}>
-                        <InputLabel>Изменить статус</InputLabel>
-                        <Select
-                            name="status"
-                            value={requestData?.status}
-                            onChange={handleUpdateStatus}
-                        >
-                            <MenuItem value="В обработке">В обработке</MenuItem>
-                            <MenuItem value="В процессе">В процессе</MenuItem>
-                            <MenuItem value="Найдена">Найдена</MenuItem>
-                            <MenuItem value="Отклонена">Отклонена</MenuItem>
-                        </Select>
-                    </FormControl>
-
-                    {/* Кнопка сохранения */}
-                    <Button variant="contained" color="primary" onClick={handleSave}>
-                        Сохранить
+                <Box sx={{display:'flex', flexDirection:'column'}}>
+                    <Button variant="contained" onClick={() => router.back()} sx={{ mb: 2 , borderRadius: 4 }}>
+                        Назад
                     </Button>
+                    <Box sx={{ flex: 0.5, border: '1px solid #575C69', padding: '35px', boxShadow: 3, borderRadius: '20px', display: "flex", flexDirection: "column", alignItems: "center" }}>
+                        <Typography variant="h6" align="center" sx={{ mb: 2, fontWeight: 'bold', color: '#b88943' }}>
+                            <IconAlertSquareRounded stroke={2} />
+                            Статус заявки
+                        </Typography>
+                        <FormControl fullWidth sx={{ mb: 2 }}>
+                            <InputLabel>Изменить статус</InputLabel>
+                            <Select name="status" value={requestData?.status} onChange={handleUpdateStatus}>
+                                <MenuItem value="В обработке">В обработке</MenuItem>
+                                <MenuItem value="В процессе">В процессе</MenuItem>
+                                <MenuItem value="Найдена">Найдена</MenuItem>
+                                <MenuItem value="Отклонена">Отклонена</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <Button  variant="outlined" sx={{ color: "#555", borderRadius: 2 }} onClick={handleSave}>
+                            Сохранить
+                        </Button>
+                    </Box>
+
+                    <Box sx={{ flex: 0.5, border: '1px solid #575C69', padding: '35px', boxShadow: 3, borderRadius: '20px', display: "flex", flexDirection: "column", alignItems: "center", mt: 3 }}>
+                        <Typography variant="h6" align="center" sx={{ mb: 2, fontWeight: 'bold', color: '#062645' }}>
+                            <IconAlertSquareRounded stroke={2} />
+                            Комментарий администратора
+                        </Typography>
+                        <TextField
+                            label="Комментарий администратора"
+                            value={requestData?.adminComment || ""} // показывается, если есть
+                            onChange={(e) =>
+                                setRequestData((prev) =>
+                                    prev ? { ...prev, adminComment: e.target.value } : prev
+                                )
+                            }
+                            fullWidth
+                            multiline
+                            rows={3}
+                            sx={{ mb: 2 }}
+                        />
+
+                        <Button variant="outlined" sx={{ color: "#555", borderRadius: 2 }} onClick={handleSave}>
+                            Сохранить
+                        </Button>
+                    </Box>
+
                 </Box>
             </Box>
-            {/* Модальное окно подтверждения */}
+
             <Modal open={openModal} onClose={handleCloseModal}>
-                <Box sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 400,
-                    bgcolor: 'background.paper',
-                    boxShadow: 24,
-                    p: 4,
-                    borderRadius: '10px',
-                    textAlign: 'center'
-                }}>
+                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', boxShadow: 24, p: 4, borderRadius: '10px', textAlign: 'center' }}>
                     <Typography variant="h6" sx={{ mb: 2 }}>✅ Изменения сохранены</Typography>
                     <Button variant="contained" color="primary" onClick={handleCloseModal}>
                         Закрыть

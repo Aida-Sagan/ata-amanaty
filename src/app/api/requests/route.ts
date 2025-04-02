@@ -31,14 +31,17 @@ export async function PUT(req: Request) {
 
     try {
         const body = await req.json();
-        const { id, status, ...updateData } = body; // ID берется из тела запроса
+        const { id, status, adminComment, ...updateData } = body;
 
         if (!id) {
             return NextResponse.json({ error: "ID заявки не передан" }, { status: 400 });
         }
 
-        // Обновляем заявку
-        const updatedRequest = await Request.findByIdAndUpdate(id, { ...updateData, status }, { new: true });
+        const updatedRequest = await Request.findByIdAndUpdate(
+            id,
+            { ...updateData, status, adminComment },
+            { new: true }
+        );
 
         if (!updatedRequest) {
             return NextResponse.json({ error: "Заявка не найдена" }, { status: 404 });
@@ -56,11 +59,13 @@ export async function POST(req: Request) {
     try {
         await connectDB();
         const body = await req.json();
-        const newRequest = new Request(body);
+        console.log("Пришли данные:", body); // Добавь это
+        const newRequest = new Request({ ...body, adminComment: "" });
         await newRequest.save();
         return NextResponse.json({ success: true, data: newRequest }, { status: 201 });
     } catch (error) {
-        console.error("Ошибка при отправке заявки:", error);
+        console.error("Ошибка при отправке заявки:", error); // Тут будет ошибка
         return NextResponse.json({ success: false, message: "Ошибка при отправке заявки" }, { status: 500 });
     }
 }
+

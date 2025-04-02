@@ -1,18 +1,10 @@
-"use client";
+import { LanguageProvider } from "@/lib/LanguageContext";
 
-import { ReactNode } from "react";
-import { ThemeProvider, CssBaseline } from "@mui/material";
-import theme from "@/theme"; // Убедись, что у тебя есть файл с темой
-import '../styles/global.css';
-
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="ru">
+        <html lang="en">
         <body>
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
-            {children}
-        </ThemeProvider>
+             <LanguageProvider>{children}</LanguageProvider>
         </body>
         </html>
     );

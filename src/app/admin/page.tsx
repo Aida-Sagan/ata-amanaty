@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 import CircularWithValueLabel from "@/components/CircularWithValueLabel";
 import { IconDatabaseEdit, IconLogout } from '@tabler/icons-react';
 import { jwtDecode } from "jwt-decode";
-
+import StatisticsModal from "@/components/StatisticsModal";
+import { usePagination } from "@/lib/PaginationContext";
 
 interface Request {
     _id: string;
@@ -18,6 +19,7 @@ interface Request {
     searcherFullName: string;
     phoneNumber: string;
     email: string;
+    applicationRegion: string;
     status: string;
     createdAt: string;
 }
@@ -26,15 +28,16 @@ interface DecodedToken {
     username: string;
 }
 
-
-export default function AdminPage() {
+export default function AdminPageContent() {
     const [auth, setAuth] = useState(false);
     const [authLoading, setAuthLoading] = useState(true);
     const router = useRouter();
-    const [requests, setRequests] =  useState<Request[]>([]);
+    const [requests, setRequests] = useState<Request[]>([]);
     const [search, setSearch] = useState("");
     const [sortAsc, setSortAsc] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [openStatistics, setOpenStatistics] = useState(false);
+
+    const { currentPage, setCurrentPage } = usePagination();
     const itemsPerPage = 10;
 
     const fetchRequests = useCallback(async () => {
@@ -49,16 +52,17 @@ export default function AdminPage() {
     useEffect(() => {
         const authenticate = async () => {
             const token = localStorage.getItem("token");
-            console.log(auth);
-
             if (!token) {
                 router.push("/admin/login");
                 return;
             }
-
+            console.log(auth)
             try {
                 const decoded: DecodedToken = jwtDecode(token);
-                if (!decoded.username) throw new Error("Недействительный токен");
+                if (!decoded.username) {
+                    console.error("Недействительный токен");
+                    return;
+                }
                 setAuth(true);
             } catch (error) {
                 console.error("Ошибка при декодировании токена:", error);
@@ -69,18 +73,15 @@ export default function AdminPage() {
             }
         };
 
-        authenticate().then(fetchRequests).catch(console.error); // ✅ Обрабатываем ошибки
-
-    }, [router, fetchRequests]); // ✅ Добавили `fetchRequests` в зависимости
-
+        authenticate().then(fetchRequests).catch(console.error);
+    }, [router, fetchRequests]);
 
     const statusColors: Record<string, string> = {
-        "В обработке": "bg-yellow-lt",
-        "В процессе": "bg-blue-lt",
-        "Найдена": "bg-green-lt",
-        "Отклонена": "bg-red-lt",
+        "В обработке": "#FFF9C4",
+        "В процессе": "#BBDEFB",
+        "Найдена": "#C8E6C9",
+        "Отклонена": "#FFCDD2",
     };
-
 
     const handleSortByDate = () => {
         setSortAsc(!sortAsc);
@@ -108,7 +109,7 @@ export default function AdminPage() {
     };
 
     return (
-        <Container sx={{ mb: 2 }}>
+        <Container sx={{ mb: 2, flexWrap: "wrap" }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 4, mb: 2 }}>
                 <Typography variant="h4" sx={{ fontWeight: "bold" }}>
                     <IconDatabaseEdit stroke={2} size={35} /> Личный кабинет администратора
@@ -128,6 +129,9 @@ export default function AdminPage() {
                 }}
                 sx={{ marginBottom: "20px" }}
             />
+            <Button variant="contained" sx={{ mb: 2 }} onClick={() => setOpenStatistics(true)}>
+                Посмотреть статистику по областям и странам
+            </Button>
 
             {authLoading ? (
                 <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
@@ -139,22 +143,20 @@ export default function AdminPage() {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>№</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>Номер заявки</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>Кого ищут</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>Вернулся ли с войны</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>Фамилия</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>Имя</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>ФИО заявителя</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>Номер тел.</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>эл.почта</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>Статус</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>
-                                        <Button onClick={handleSortByDate}>
+                                    <TableCell sx={{ fontWeight: "bold", fontSize: "12px" }}>№</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold", fontSize: "12px" }}>Номер заявки</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold", fontSize: "12px" }}>Фамилия</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold", fontSize: "12px" }}>Имя</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold", fontSize: "12px" }}>ФИО заявителя</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold", fontSize: "12px" }}>Регион подачи заявки</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold", fontSize: "12px" }}>Номер тел.</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold", fontSize: "12px" }}>Статус</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold", fontSize: "12px", textAlign: "center" }}>
+                                        <Button onClick={handleSortByDate} sx={{ fontWeight: "bold", fontSize: "12px" }}>
                                             Дата поступления заявки {sortAsc ? "▲" : "▼"}
                                         </Button>
                                     </TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>Действие</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold" }}>Действие</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -162,35 +164,50 @@ export default function AdminPage() {
                                     currentItems.map((req, index) => (
                                         <TableRow key={req._id}>
                                             <TableCell>{indexOfFirstItem + index + 1}</TableCell>
-                                            <TableCell>{req._id}</TableCell>
-                                            <TableCell>{req.lookingFor}</TableCell>
-                                            <TableCell>{req.returnedFromWar}</TableCell>
-                                            <TableCell>{req.lastName}</TableCell>
-                                            <TableCell>{req.firstName}</TableCell>
-                                            <TableCell>{req.searcherFullName}</TableCell>
-                                            <TableCell>{req.phoneNumber}</TableCell>
-                                            <TableCell>{req.email}</TableCell>
-                                            <TableCell className={`badge ${statusColors[req.status]}`} sx={{display: 'flex', alignContent:'center'}}>
+                                            <TableCell sx={{ fontSize: "10px" }}>{req._id}</TableCell>
+                                            <TableCell sx={{ fontSize: "10px" }}>{req.lastName}</TableCell>
+                                            <TableCell sx={{ fontSize: "10px" }}>{req.firstName}</TableCell>
+                                            <TableCell sx={{ fontSize: "10px" }}>{req.searcherFullName}</TableCell>
+                                            <TableCell sx={{ fontSize: "10px" }}>{req.applicationRegion}</TableCell>
+                                            <TableCell sx={{ fontSize: "10px" }}>{req.phoneNumber}</TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    fontSize: "10px",
+                                                    backgroundColor: statusColors[req.status],
+                                                    color: "#000",
+                                                    borderRadius: "4px",
+                                                    textAlign: "center",
+                                                }}
+                                            >
                                                 {req.status}
                                             </TableCell>
-                                            <TableCell>{new Date(req.createdAt).toLocaleDateString()}</TableCell>
+                                            <TableCell sx={{ fontSize: "10px", textAlign: "center" }}>
+                                                {new Date(req.createdAt).toLocaleDateString("ru-RU", {
+                                                    day: "2-digit",
+                                                    month: "2-digit",
+                                                    year: "numeric",
+                                                })}
+
+
+                                            </TableCell>
                                             <TableCell>
                                                 <Button variant="contained" color="primary" onClick={() => router.push(`/admin/${req._id}`)}>
-                                                    Подробнее
+                                                    заявка
                                                 </Button>
                                             </TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={12} align="center">Нет данных</TableCell>
+                                        <TableCell colSpan={12} align="center">
+                                            Нет данных
+                                        </TableCell>
                                     </TableRow>
                                 )}
                             </TableBody>
                         </Table>
                     </TableContainer>
 
-                    {/* Пагинация */}
                     <Pagination
                         count={totalPages}
                         page={currentPage}
@@ -200,6 +217,8 @@ export default function AdminPage() {
                     />
                 </>
             )}
+
+            <StatisticsModal open={openStatistics} onClose={() => setOpenStatistics(false)} />
         </Container>
     );
 }
