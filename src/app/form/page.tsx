@@ -23,6 +23,8 @@
     import Image from "next/image";
     import { useLanguage } from "@/lib/LanguageContext";
     import countries from "@/lib/data/countries-ru.json";
+    import { Tooltip, IconButton } from "@mui/material";
+    import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 
 
@@ -56,6 +58,8 @@
         email: string;
         heardAboutUs: string;
         heardAboutUsOther?: string;
+        filesLink?: string;
+
     }
 
     const schema = yup.object().shape({
@@ -87,6 +91,11 @@
         email: yup.string().email("Введите корректный email").required("Email обязателен"),
         heardAboutUs: yup.string().required("Выберите источник"),
         heardAboutUsOther: yup.string().optional(),
+        filesLink: yup
+            .string()
+            .url("Введите корректную ссылку")
+            .optional(),
+
 
     });
 
@@ -133,6 +142,8 @@
                 email: "",
                 heardAboutUs: "",
                 heardAboutUsOther: "",
+                filesLink: "",
+
             },
         });
 
@@ -324,6 +335,42 @@
                             )}
                         />
                     </FormControl>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <Tooltip
+                            title={
+                                <Box sx={{ maxWidth: 300 }}>
+                                    <Typography variant="body2">
+                                        <strong>Как прикрепить файлы:</strong><br />
+                                        1. Загрузите файлы на Google Диск, Яндекс.Диск или Mail.ru<br />
+                                        2. Откройте доступ по ссылке для всех<br />
+                                        3. Вставьте эту ссылку в поле<br /><br />
+                                        ⚠️ Без доступа мы не сможем просмотреть ваши файлы
+                                        <hr></hr>
+                                        ⚠️ Если не получается вставить ссылку — не переживайте. Просто напишите в Telegram @aida_sgndkva, и мы подскажем.
+                                        Поле можно оставить пустым — вы сможете добавить ссылку позже.
+                                    </Typography>
+                                </Box>
+                            }
+                            placement="top"
+                            arrow
+                        >
+                            <IconButton sx={{ mt: 1 }}>
+                                <InfoOutlinedIcon color="action" />
+                            </IconButton>
+                        </Tooltip>
+                        <TextField
+                            label="Ссылка на файлы"
+                            placeholder="https://drive.google.com/..."
+                            fullWidth
+                            margin="normal"
+                            {...register("filesLink")}
+                            error={!!errors.filesLink}
+                            helperText={
+                                errors.filesLink?.message || "Вставьте ссылку на Google Drive, Яндекс.Диск и т.д."
+                            }
+                        />
+
+                    </Box>
 
                     <TextField label={t("archiveSearch")} {...register("archiveSearch")} fullWidth />
                     <TextField label={t("archiveDetails")} {...register("archiveDetails")} fullWidth multiline rows={3} />

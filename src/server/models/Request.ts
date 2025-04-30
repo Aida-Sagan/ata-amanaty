@@ -46,6 +46,7 @@ const RequestSchema = new mongoose.Schema({
     status: { type: String as () => StatusType, enum: STATUS_ENUM, default: "На стадии рассмотрения" },
     createdAt: { type: Date, default: Date.now },
     adminComment: { type: String, default: "" },
+    filesLink: { type: String, default: "" },
 });
 
 export default mongoose.models.Request || mongoose.model("Request", RequestSchema);

@@ -50,7 +50,9 @@ interface RequestData {
     heardAboutUs: string;
     heardAboutUsOther?: string;
     status: string;
-    adminComment?: string; // ✅ Добавь это поле
+    adminComment?: string;
+    filesLink?: string;
+
 }
 
 export default function AdminRequestPage() {
@@ -181,6 +183,38 @@ export default function AdminRequestPage() {
                     <TextField label="Страна подачи заявки" name="applicationCountry" value={requestData?.applicationCountry || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                     <TextField label="Электронная почта" name="email" value={requestData?.email} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                     <TextField label="Цель поиска" name="searchGoal" value={requestData?.searchGoal || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField
+                        label="Ссылка на файлы"
+                        name="filesLink"
+                        value={requestData?.filesLink || ""}
+                        onChange={handleChange}
+                        fullWidth
+                        sx={{ mb: 2 }}
+                        InputProps={{
+                            endAdornment: requestData?.filesLink ? (
+                                <Button
+                                    href={requestData.filesLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    size="small"
+                                    sx={{
+                                        ml: 1,
+                                        backgroundColor: 'rgba(7,49,104,0.36)',
+                                        color: "#fff",
+                                        p: 1,
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(7,49,104,0.7)',
+                                            color: "#fff",
+                                        }
+                                    }}
+                                >
+                                    Открыть
+                                </Button>
+
+                            ) : null
+                        }}
+                    />
+
                     <TextField label="Искали ли в архивах?" name="archiveSearch" value={requestData?.archiveSearch || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                     <TextField label="Какие данные найдены" name="archiveDetails" value={requestData?.archiveDetails || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                     <TextField label="Дополнительная информация" name="additionalInfo" value={requestData?.additionalInfo || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />

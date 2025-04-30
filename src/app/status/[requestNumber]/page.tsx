@@ -55,6 +55,7 @@ interface RequestData {
     heardAboutUsOther?: string;
     status: string;
     adminComment?: string;
+    filesLink?: string;
 }
 
 const fieldLabels: Record<keyof RequestData, string> = {
@@ -88,7 +89,9 @@ const fieldLabels: Record<keyof RequestData, string> = {
     heardAboutUs: "Как узнали о нас",
     heardAboutUsOther: "Уточните источник",
     status: "Статус",
-    adminComment: "Комментарий администратора"
+    adminComment: "Комментарий администратора",
+    filesLink: "Ссылка на файлы",
+
 };
 
 export default function StatusPage() {

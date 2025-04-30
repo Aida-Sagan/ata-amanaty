@@ -51,6 +51,7 @@ interface RequestData {
     email: string;
     heardAboutUs: string;
     heardAboutUsOther?: string;
+    filesLink?: string;
 }
 
 export default function VerifyPage() {
@@ -70,6 +71,9 @@ export default function VerifyPage() {
         try {
             const response = await axios.get(`/api/requests?id=${requestId}`);
             setRequestData(response.data.data);
+            console.log("filesLink из бэка:", response.data.data.filesLink);
+
+
         } catch (error) {
             console.error("Ошибка загрузки данных:", error);
             alert("Не удалось загрузить заявку.");
@@ -180,6 +184,15 @@ export default function VerifyPage() {
                 <Divider textAlign="left">{t("searchGoalTitle")}</Divider>
 
                 <TextField label={t("searchGoal")} name="searchGoal" value={requestData.searchGoal || ""} onChange={handleChange} fullWidth />
+
+                <TextField
+                    label="Ссылка на файлы"
+                    fullWidth
+                    margin="normal"
+                    name="filesLink"
+                    value={requestData.filesLink || ""} onChange={handleChange}
+                />
+
                 <TextField label={t("archiveSearch")} name="archiveSearch" value={requestData.archiveSearch || ""} onChange={handleChange} fullWidth />
                 <TextField label={t("archiveDetails")} name="archiveDetails" value={requestData.archiveDetails || ""} onChange={handleChange} fullWidth multiline rows={3} />
                 <TextField label={t("additionalInfo")} name="additionalInfo" value={requestData.additionalInfo || ""} onChange={handleChange} fullWidth multiline rows={3} />
