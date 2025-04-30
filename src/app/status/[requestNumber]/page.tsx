@@ -14,6 +14,13 @@ import axios from "axios";
 import { IconAlertSquareRounded, IconChartBubble, IconMail } from "@tabler/icons-react";
 import Image from "next/image";
 import { useLanguage } from "@/lib/LanguageContext";
+import "@/styles/global.css";
+import {
+    Accordion,
+    AccordionSummary,
+    AccordionDetails
+} from "@mui/material";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 
 interface RequestData {
@@ -113,10 +120,16 @@ export default function StatusPage() {
     }, [requestNumber]);
 
     const statusColors: Record<string, string> = {
-        "В обработке": "bg-yellow-lt",
-        "В процессе": "bg-blue-lt",
-        "Найдена": "bg-green-lt",
-        "Отклонена": "bg-red-lt",
+        "На стадии рассмотрения": "bg-yellow-lt",
+        "В процессе поиска": "bg-blue-lt",
+        "Недостаточно данных": "bg-orange-lt",
+        "Не найдены документы в ЦАМО": "bg-gray-lt",
+        "Найдено частично": "bg-teal-lt",
+        "Найдено": "bg-green-lt",
+        "Передано в архив": "bg-indigo-lt",
+        "Ожидает ответа от заявителя": "bg-cyan-lt",
+        "Обратиться для увековечивания": "bg-lime-lt"
+
     };
 
     if (loading) return <Typography>Загрузка...</Typography>;
@@ -149,10 +162,13 @@ export default function StatusPage() {
                     <Button variant="contained" fullWidth onClick={() => router.back()}>{t("backToHome")}</Button>
 
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 2, border: "1px solid #0f172a", borderRadius: 2, boxShadow: 2 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                            <IconChartBubble stroke={2} style={{ marginRight: "8px" }} />{t('statusTitle')}:
+                        <Typography variant="subtitle1" sx={{ fontWeight: "bold"}}>
+                            <IconChartBubble stroke={2} style={{ marginRight: "8px" }} />
+                            {t('statusTitle')}:
                         </Typography>
-                        <span className={`badge ${statusColors[requestData?.status || "unknown"]}`}>{requestData?.status || "Неизвестно"}</span>
+                        <span className={`badge ${statusColors[requestData?.status?.trim() || ""] }`} style={{fontSize: "11px"}}>
+                          {requestData?.status || "Неизвестно"}
+                        </span>
                     </Box>
 
                     <Box sx={{ p: 2, border: "1px solid #575C69", boxShadow: 2, borderRadius: 2, backgroundColor: "#f9fafb", mt:7 }}>
@@ -173,6 +189,62 @@ export default function StatusPage() {
                         <Typography variant="body2">Марфуза Сулейменова — 8-776-828-45-35</Typography>
                         <Typography variant="body2">Закиева Ардак — +7 (776) 828-45-34</Typography>
                     </Box>
+
+                    <Box sx={{ p: 2, border: "1px solid #0f172a", borderRadius: 2, boxShadow: 2, backgroundColor: "rgb(241,251,238)" }}>
+                        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold", color: "#004991" }}>
+                            <IconAlertSquareRounded stroke={2} style={{ marginRight: "8px" }} />{t("definition")}
+                        </Typography>
+
+                        {[
+                            {
+                                ru: "На стадии рассмотрения — заявка только поступила, ещё не обработана.",
+                                kk: "Қаралу сатысында — өтініш енді ғана қабылданды, әлі өңделмеген."
+                            },
+                            {
+                                ru: "В процессе поиска — заявка обрабатывается, ведётся активный поиск.",
+                                kk: "Іздеу процесінде — өтініш өңделіп жатыр, белсенді іздеу жүргізілуде."
+                            },
+                            {
+                                ru: "Недостаточно данных — сведений недостаточно для начала поиска, нужно уточнение от заявителя.",
+                                kk: "Деректер жеткіліксіз — іздеуді бастау үшін мәлімет жеткіліксіз, өтініш берушіден нақтылау қажет."
+                            },
+                            {
+                                ru: "Не найдены документы в ЦАМО — по заявке сделан запрос, но в Центральном архиве Министерства обороны РФ ничего не найдено.",
+                                kk: "ҚР ҚМ архивінен құжат табылмады — сұраныс жасалды, бірақ РФ Қорғаныс министрлігінің орталық архивінен ештеңе табылған жоқ."
+                            },
+                            {
+                                ru: "Найдено частично — найдены отдельные сведения, но нет полной информации.",
+                                kk: "Жартылай табылды — кейбір деректер табылды, бірақ толық ақпарат жоқ."
+                            },
+                            {
+                                ru: "Найдено — найдены документы и подтверждения, заявка успешно закрыта.",
+                                kk: "Табылды — құжаттар мен дәлелдер табылды, өтініш сәтті аяқталды."
+                            },
+                            {
+                                ru: "Передано в архив — заявка закрыта и перенесена в архив (например, после долгого времени без ответа).",
+                                kk: "Мұрағатқа жіберілді — өтініш жабылды және мұрағатқа жіберілді (мысалы, ұзақ уақыт жауап болмаған жағдайда)."
+                            },
+                            {
+                                ru: "Ожидает ответа от заявителя — заявителю отправлен запрос на уточнение, но ответ пока не получен.",
+                                kk: "Өтініш берушінің жауабы күтілуде — өтініш берушіге нақтылау сұранысы жіберілді, бірақ жауап әлі жоқ."
+                            },
+                            {
+                                ru: "Рекомендовано обратиться в администрацию по месту захоронения для увековечивания.",
+                                kk: "Еске алу үшін әкімдікке жүгіну ұсынылады."
+                            }
+                        ].map((item, idx) => (
+                            <Accordion key={idx} sx={{ bgcolor: "transparent" }}>
+                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                    <Typography sx={{ fontWeight: "bold" }}>{item.ru.split(" — ")[0]}</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <Typography variant="body2" sx={{ mb: 1 }}>{item.ru}</Typography>
+                                    <Typography variant="body2" sx={{ color: "#00796b" }}>{item.kk}</Typography>
+                                </AccordionDetails>
+                            </Accordion>
+                        ))}
+                    </Box>
+
                 </Box>
             </Box>
         </Box>

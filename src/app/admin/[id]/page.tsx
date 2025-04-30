@@ -10,6 +10,14 @@ import axios from "axios";
 import StatusChangeAlert from "@/components/alert";
 import { SelectChangeEvent } from "@mui/material";
 import Image from "next/image";
+import "@/styles/global.css";
+import {
+    Accordion,
+    AccordionSummary,
+    AccordionDetails
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
 
 interface RequestData {
     _id: string;
@@ -115,11 +123,17 @@ export default function AdminRequestPage() {
     };
 
     const statusColors: Record<string, string> = {
-        "В обработке": "bg-yellow-lt",
-        "В процессе": "bg-blue-lt",
-        "Найдена": "bg-green-lt",
-        "Отклонена": "bg-red-lt",
+        "На стадии рассмотрения": "bg-yellow-lt",
+        "В процессе поиска": "bg-blue-lt",
+        "Недостаточно данных": "bg-orange-lt",
+        "Не найдены документы в ЦАМО": "bg-gray-lt",
+        "Найдено частично": "bg-teal-lt",
+        "Найдено": "bg-green-lt",
+        "Передано в архив": "bg-indigo-lt",
+        "Ожидает ответа от заявителя": "bg-cyan-lt",
+        "Обратиться для увековечивания": "bg-lime-lt"
     };
+
 
     if (loading) {
         return <Typography sx={{ mt: 4, fontSize: "1.2rem" }}>Загрузка...</Typography>;
@@ -195,15 +209,24 @@ export default function AdminRequestPage() {
                             <IconAlertSquareRounded stroke={2} />
                             Статус заявки
                         </Typography>
-                        <FormControl fullWidth sx={{ mb: 2 }}>
+                        <FormControl fullWidth sx={{ mb: 2}}>
                             <InputLabel>Изменить статус</InputLabel>
-                            <Select name="status" value={requestData?.status} onChange={handleUpdateStatus}>
-                                <MenuItem value="В обработке">В обработке</MenuItem>
-                                <MenuItem value="В процессе">В процессе</MenuItem>
-                                <MenuItem value="Найдена">Найдена</MenuItem>
-                                <MenuItem value="Отклонена">Отклонена</MenuItem>
+                            <Select name="status" value={requestData?.status} onChange={handleUpdateStatus} >
+                                <MenuItem value="На стадии рассмотрения">На стадии рассмотрения</MenuItem>
+                                <MenuItem value="В процессе поиска">В процессе поиска</MenuItem>
+                                <MenuItem value="Недостаточно данных">Недостаточно данных</MenuItem>
+                                <MenuItem value="Не найдены документы в ЦАМО">Не найдены документы в ЦАМО</MenuItem>
+                                <MenuItem value="Найдено частично">Найдено частично</MenuItem>
+                                <MenuItem value="Найдено">Найдено</MenuItem>
+                                <MenuItem value="Передано в архив">Передано в архив</MenuItem>
+                                <MenuItem value="Ожидает ответа от заявителя">Ожидает ответа от заявителя</MenuItem>
+                                <MenuItem value="Обратиться для увековечивания">
+                                    Обратиться для увековечивания
+                                </MenuItem>
+
                             </Select>
                         </FormControl>
+
                         <Button  variant="outlined" sx={{ color: "#555", borderRadius: 2 }} onClick={handleSave}>
                             Сохранить
                         </Button>
@@ -232,6 +255,35 @@ export default function AdminRequestPage() {
                             Сохранить
                         </Button>
                     </Box>
+
+                    <Box sx={{ p: 2, border: "1px solid #0f172a", borderRadius: 4, boxShadow: 2, backgroundColor: "rgb(251,250,232)", maxWidth: 400, mt:2 }}>
+                        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold", color: "#004991" }}>
+                            <IconAlertSquareRounded stroke={2} style={{ marginRight: "8px" }} />
+                            Что означает статус заявки
+                        </Typography>
+
+                        {[
+                            "На стадии рассмотрения — заявка только поступила, ещё не обработана.",
+                            "В процессе поиска — заявка обрабатывается, ведётся активный поиск.",
+                            "Недостаточно данных — сведений недостаточно для начала поиска, нужно уточнение от заявителя.",
+                            "Не найдены документы в ЦАМО — по заявке сделан запрос, но в Центральном архиве Министерства обороны РФ ничего не найдено.",
+                            "Найдено частично — найдены отдельные сведения, но нет полной информации.",
+                            "Найдено — найдены документы и подтверждения, заявка успешно закрыта.",
+                            "Передано в архив — заявка закрыта и перенесена в архив (например, после долгого времени без ответа).",
+                            "Ожидает ответа от заявителя — заявителю отправлен запрос на уточнение, но ответ пока не получен.",
+                            "Рекомендовано обратиться в администрацию по месту захоронения для увековечивания."
+                        ].map((text, idx) => (
+                            <Accordion key={idx} sx={{ bgcolor: "transparent" }}>
+                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                    <Typography sx={{ fontWeight: "bold" }}>{text.split(" — ")[0]}</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <Typography variant="body2">{text}</Typography>
+                                </AccordionDetails>
+                            </Accordion>
+                        ))}
+                    </Box>
+
 
                 </Box>
             </Box>

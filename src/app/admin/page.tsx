@@ -9,6 +9,9 @@ import { IconDatabaseEdit, IconLogout } from '@tabler/icons-react';
 import { jwtDecode } from "jwt-decode";
 import StatisticsModal from "@/components/StatisticsModal";
 import { usePagination } from "@/lib/PaginationContext";
+import "@/styles/global.css";
+
+
 
 interface Request {
     _id: string;
@@ -77,11 +80,17 @@ export default function AdminPageContent() {
     }, [router, fetchRequests]);
 
     const statusColors: Record<string, string> = {
-        "В обработке": "#FFF9C4",
-        "В процессе": "#BBDEFB",
-        "Найдена": "#C8E6C9",
-        "Отклонена": "#FFCDD2",
+        "На стадии рассмотрения": "bg-yellow-lt",
+        "В процессе поиска": "bg-blue-lt",
+        "Недостаточно данных": "bg-orange-lt",
+        "Не найдены документы в ЦАМО": "bg-gray-lt",
+        "Найдено частично": "bg-teal-lt",
+        "Найдено": "bg-green-lt",
+        "Передано в архив": "bg-indigo-lt",
+        "Ожидает ответа от заявителя": "bg-cyan-lt",
+        "Обратиться для увековечивания": "bg-lime-lt"
     };
+
 
     const handleSortByDate = () => {
         setSortAsc(!sortAsc);
@@ -93,10 +102,12 @@ export default function AdminPageContent() {
     };
 
     const filteredRequests = requests.filter((req) =>
+        req._id.toLowerCase().includes(search.toLowerCase()) ||
         req.lastName.toLowerCase().includes(search.toLowerCase()) ||
         req.firstName.toLowerCase().includes(search.toLowerCase()) ||
         req.phoneNumber.includes(search)
     );
+
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;

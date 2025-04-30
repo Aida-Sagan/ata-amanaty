@@ -1,6 +1,17 @@
 import mongoose from "mongoose";
 
-const STATUS_ENUM = ["В обработке", "В процессе", "Найдена", "Отклонена"] as const;
+const STATUS_ENUM = [
+    "На стадии рассмотрения",
+    "В процессе поиска",
+    "Недостаточно данных",
+    "Не найдены документы в ЦАМО",
+    "Найдено частично",
+    "Найдено",
+    "Передано в архив",
+    "Ожидает ответа от заявителя",
+    "Обратиться для увековечивания"
+] as const;
+
 type StatusType = (typeof STATUS_ENUM)[number];
 
 const RequestSchema = new mongoose.Schema({
@@ -32,11 +43,9 @@ const RequestSchema = new mongoose.Schema({
     additionalInfo: String,
     heardAboutUs: String,
     heardAboutUsOther: String,
-    status: { type: String as () => StatusType, enum: STATUS_ENUM, default: "В обработке" },
+    status: { type: String as () => StatusType, enum: STATUS_ENUM, default: "На стадии рассмотрения" },
     createdAt: { type: Date, default: Date.now },
     adminComment: { type: String, default: "" },
-
-
 });
 
 export default mongoose.models.Request || mongoose.model("Request", RequestSchema);

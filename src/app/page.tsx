@@ -19,6 +19,8 @@ import { useLanguage } from "@/lib/LanguageContext";
 
 import Image from "next/image";
 import axios from "axios";
+import { IconBrandTelegram } from "@tabler/icons-react";
+
 
 export default function HomePage() {
     const router = useRouter();
@@ -83,9 +85,32 @@ export default function HomePage() {
             <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 1 }}>
                 <Box sx={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", p: 2 }}>
                     <Image src="/logo.png" alt="Logo" width={200} height={110} />
-                    <Box display="flex" alignItems="center" gap={2}>
+
+                    <Box
+                        display="flex"
+                        alignItems="center"
+                        gap={2}
+                        sx={{
+                            flexDirection: "row",
+                            "@media (max-width:760px)": {
+                                flexDirection: "column",
+                                alignItems: "flex-start"
+                            }
+                        }}
+                    >
+                        <Button
+                            variant="text"
+                            href="https://ata-amanaty.framer.website/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{ textTransform: "none", fontWeight: 500 }}
+                        >
+                            { t('website')}
+                        </Button>
+
                         <Select
                             value={language === "ru" ? "Русский" : "Қазақша"}
+                            sx={{ minWidth: 170, height: '35px'}}
                             onChange={(e) => changeLanguage(e.target.value === "Русский" ? "ru" : "kz")}
                         >
                             <MenuItem value="Русский">Русский</MenuItem>
@@ -109,13 +134,13 @@ export default function HomePage() {
                     <Card sx={{ width: 260, p: 2, borderRadius: 3, boxShadow: 2 }}>
                         <CardContent sx={{ textAlign: "center" }}>
                             <Typography variant="h6">{t("submitted")}</Typography>
-                            <Typography variant="h3" sx={{ mt: 1 }}>{loading ? "..." : statistics.totalApplications}</Typography>
+                            <Typography variant="h3" sx={{ mt: 1, fontWeight: 600, color: "#084377" }}>{loading ? "..." : statistics.totalApplications}</Typography>
                         </CardContent>
                     </Card>
                     <Card sx={{ width: 260, p: 2, borderRadius: 3, boxShadow: 2 }}>
                         <CardContent sx={{ textAlign: "center" }}>
-                            <Typography variant="h6">{t("found")}</Typography>
-                            <Typography variant="h3" sx={{ mt: 1 }}>{loading ? "..." : statistics.foundPeople}</Typography>
+                            <Typography variant="h6" >{t("found")}</Typography>
+                            <Typography variant="h3" sx={{ mt: 1, fontWeight: 600, color: "#4b9166"  }}>{loading ? "..." : statistics.foundPeople}</Typography>
                         </CardContent>
                     </Card>
                 </Box>
@@ -123,7 +148,11 @@ export default function HomePage() {
                 <Box sx={{ display: "flex", gap: 2, mt: 4, flexWrap: "wrap", justifyContent: "center" }}>
                     <Button
                         variant="contained"
-                        sx={{ backgroundColor: "#1976d2", color: "#ffffff", fontWeight: "bold", borderRadius: 3 }}
+                        sx={{ backgroundColor: "#1976d2", color: "#ffffff", fontWeight: "bold", borderRadius: 3,
+                            "&:hover": {
+                                backgroundColor: "#125ea3",
+                            }
+                    }}
                         onClick={() => router.push("/form")}
                     >
                         {t("submit")}
@@ -145,9 +174,72 @@ export default function HomePage() {
                     </Button>
                 </Box>
             </Box>
+            <Box
+                sx={{
+                    p: 2,
+                    mt: 4,
+                    border: "1px solid #0f172a",
+                    borderRadius: 2,
+                    backgroundColor: "#f4f4f4",
+                    textAlign: "center",
+                    boxShadow: 2,
+                }}
+            >
+                <Typography variant="h6" sx={{ fontWeight: "bold", color: "#004991", mb: 1 }}>
+                    {t("telegramHelp")}
+                </Typography>
+                <Typography
+                    variant="body1"
+                    dangerouslySetInnerHTML={{ __html: t("telegramInfo") }}
+                    sx={{ mb: 2 }}
+                />
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    href="https://t.me/atamanaty"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    startIcon={<IconBrandTelegram />}
+                >
+                    {t("telegramGo")}
+                </Button>
+            </Box>
+            <Box
+                sx={{
+                    p: 2,
+                    mt: 4,
+                    border: "1px solid #d32f2f",
+                    borderRadius: 2,
+                    backgroundColor: "#fff3f3",
+                    textAlign: "center",
+                    boxShadow: 2,
+                }}
+            >
+                <Typography variant="h6" sx={{ fontWeight: "bold", color: "#b71c1c", mb: 1 }}>
+                    {t("techProblemsTitle")}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                    {t("techProblemsText")}
+                </Typography>
+                <Button
+                    variant="outlined"
+                    sx={{ fontWeight: "bold", color: "#5e1414" }}
+                    href="https://t.me/aida_sgndkva"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    startIcon={<IconBrandTelegram />}
+                >
+                   @aida_sgndkva
+                </Button>
+                <p>
+                    aidasagan369@gmail.com
+                </p>
+
+            </Box>
+
 
             <Box component="footer" sx={{ textAlign: "center", py: 1, backgroundColor: "#0A2640", color: "#fff", mt: 5 }}>
-                <Typography variant="body2">© Atamyn Amanaty, 2025</Typography>
+                <Typography variant="body2">© Atamnyn Amanaty, 2025</Typography>
 
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, my: 1 }}>
                     <Typography variant="body2">Алия Сагимбаева — <Link href="https://wa.me/77019997820" color="inherit" underline="hover">+7 701 999 78 20</Link></Typography>
