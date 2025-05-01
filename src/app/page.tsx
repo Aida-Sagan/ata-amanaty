@@ -39,9 +39,18 @@ export default function HomePage() {
     useEffect(() => {
         axios.get("/api/statistics")
             .then((response) => {
-                setStatistics(response.data.data);
+                const rawStats = response.data.data;
+
+                setStatistics({
+                    totalApplications: rawStats.totalApplications + 10286,
+                    foundPeople: rawStats.foundPeople + 1957,
+                    regions: rawStats.regions,
+                    countries: rawStats.countries,
+                });
+
                 setLoading(false);
             })
+
             .catch((error) => {
                 console.error("Ошибка загрузки статистики:", error);
                 setLoading(false);

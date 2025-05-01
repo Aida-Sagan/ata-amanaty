@@ -6,10 +6,10 @@ dotenv.config();
 const MONGODB_URI =
     process.env.NODE_ENV === "development"
         ? process.env.MONGODB_URI_LOCAL
-        : process.env.MONGODB_URI_ATLAS;
+        : process.env.MONGODB_URI_PROD;
 
 if (!MONGODB_URI) {
-    throw new Error("❌ MONGODB_URI не задана! Добавь её в .env или Vercel.");
+    throw new Error("MONGODB_URI не задана! ");
 }
 
 const connectDB = async (): Promise<void> => {
