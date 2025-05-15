@@ -174,12 +174,39 @@ export default function AdminRequestPage() {
   /* --------------------- копирование в буфер --------------------- */
     const handleCopy = () => {
         const plain = buildPlainText(requestData);
-        navigator.clipboard
-        .writeText(plain)
-        .then(() => setCopied(true))
-        .catch(console.error);
-    };
 
+        // современный API есть + безопасный контекст
+        if (navigator.clipboard?.writeText && window.isSecureContext) {
+            navigator.clipboard
+            .writeText(plain)
+            .then(() => setCopied(true))
+            .catch(err => {
+                console.error('Clipboard error', err);
+                fallbackCopy(plain);
+            });
+        } else {
+            // используем запасной вариант
+            fallbackCopy(plain);
+        }
+        };
+
+        function fallbackCopy(text: string) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';   // чтобы не прыгал экран
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+
+        try {
+            const ok = document.execCommand('copy');
+            setCopied(ok);
+        } catch (err) {
+            console.error('Fallback copy failed', err);
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    }
     const statusColors: Record<string, string> = {
         "На стадии рассмотрения": "bg-yellow-lt",
         "В процессе поиска": "bg-blue-lt",
