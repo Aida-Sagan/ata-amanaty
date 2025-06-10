@@ -179,7 +179,9 @@ export default function AdminRequestPage() {
 
   /* --------------------- копирование в буфер --------------------- */
     const handleCopy = () => {
+        if (!requestData) return;
         const plain = buildPlainText(requestData);
+
 
         // современный API есть + безопасный контекст
         if (navigator.clipboard?.writeText && window.isSecureContext) {
