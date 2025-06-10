@@ -322,9 +322,45 @@ export default function AdminRequestPage() {
                         }}
                     />
 
-                    <TextField label="Искали ли в архивах?" name="archiveSearch" value={requestData?.archiveSearch || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Какие данные найдены" name="archiveDetails" value={requestData?.archiveDetails || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                    <TextField label="Дополнительная информация" name="additionalInfo" value={requestData?.additionalInfo || ""} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                    <TextField
+                        label="Искали ли в архивах?"
+                        name="archiveSearch"
+                        value={requestData?.archiveSearch || ""}
+                        onChange={handleChange}
+                        fullWidth
+                        multiline
+                        minRows={2}
+                        sx={{ mb: 2 }}
+                        InputProps={{
+                            sx: { resize: "vertical" }
+                        }}
+                    />
+                    <TextField
+                        label="Какие данные найдены"
+                        name="archiveDetails"
+                        value={requestData?.archiveDetails || ""}
+                        onChange={handleChange}
+                        fullWidth
+                        multiline
+                        minRows={2}
+                        sx={{ mb: 2 }}
+                        InputProps={{
+                            sx: { resize: "vertical" }
+                        }}
+                    />
+                    <TextField
+                        label="Дополнительная информация"
+                        name="additionalInfo"
+                        value={requestData?.additionalInfo || ""}
+                        onChange={handleChange}
+                        fullWidth
+                        multiline
+                        minRows={4}
+                        sx={{ mb: 2 }}
+                        InputProps={{
+                            sx: { resize: "vertical" }
+                        }}
+                    />
                     <FormControl fullWidth sx={{ mb: 2 }}>
                         <InputLabel>Откуда узнали о нас?</InputLabel>
                         <Select name="heardAboutUs" value={requestData?.heardAboutUs || ""} onChange={handleSelectChange}>
