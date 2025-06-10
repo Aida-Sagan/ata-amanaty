@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
-    Container, Typography, TextField, Modal, Button, Box, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox
+    Container, Typography, TextField, Modal, Button, Box, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox, Snackbar
 } from "@mui/material";
 import { IconNotes, IconAlertSquareRounded } from '@tabler/icons-react';
 import axios from "axios";
@@ -63,7 +63,8 @@ export default function AdminRequestPage() {
     const [showAlert, setShowAlert] = useState(false);
     const [status, setStatus] = useState("");
     const [openModal, setOpenModal] = useState(false);
-
+    const [copied, setCopied] = useState(false);
+    
     useEffect(() => {
         axios.get(`/api/requests?id=${id}`)
             .then(response => {
@@ -124,6 +125,88 @@ export default function AdminRequestPage() {
         }
     };
 
+    const buildPlainText = useCallback((data: Partial<RequestData>) => {
+        const out: string[] = [];
+
+        /** Удобный помощник: не добавляем пустые поля */
+        const add = (label: string, value: unknown) => {
+        if (value !== undefined && value !== null && value !== '') {
+            out.push(`${label}: ${value}`);
+        }
+        };
+
+        add('Кого ищут', data.lookingFor);
+        add('Вернулся ли с войны', data.returnedFromWar);
+        add('Фамилия', data.lastName);
+        add('Имя', data.firstName);
+        add('Отчество', data.middleName);
+        add('Дата рождения', data.birthDate);
+        add('Страна рождения', data.birthCountry);
+        add('Область рождения', data.birthRegion);
+        add('Город / район рождения', data.birthPlaceCity);
+        add('Дата призыва', data.conscriptionDate);
+        add('Место призыва', data.conscriptionPlace);
+        add('Семейный статус', data.maritalStatus);
+        add('Имена родственников', data.relativesListed);
+        add('Дети', data.childrenNames);
+        if (data.prisoner) {
+        add('Был в плену', 'Да');
+        add('Где был пленён', data.prisonerInfo);
+        } else {
+        add('Был в плену', 'Нет');
+        }
+        add('ФИО заявителя', data.searcherFullName);
+        add('Телефон', data.phoneNumber);
+        add('Домашний адрес', data.homeAddress);
+        add('Область заявителя', data.applicationRegion);
+        add('Страна подачи', data.applicationCountry);
+        add('E-mail', data.email);
+        add('Цель поиска', data.searchGoal);
+        add('Ссылка на файлы', data.filesLink);
+        add('Искали в архивах', data.archiveSearch);
+        add('Найдено в архивах', data.archiveDetails);
+        add('Доп. информация', data.additionalInfo);
+        add('Откуда узнали', data.heardAboutUs);
+
+        return out.join('\n');
+    }, []);
+
+  /* --------------------- копирование в буфер --------------------- */
+    const handleCopy = () => {
+        const plain = buildPlainText(requestData);
+
+        // современный API есть + безопасный контекст
+        if (navigator.clipboard?.writeText && window.isSecureContext) {
+            navigator.clipboard
+            .writeText(plain)
+            .then(() => setCopied(true))
+            .catch(err => {
+                console.error('Clipboard error', err);
+                fallbackCopy(plain);
+            });
+        } else {
+            // используем запасной вариант
+            fallbackCopy(plain);
+        }
+        };
+
+        function fallbackCopy(text: string) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';   // чтобы не прыгал экран
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+
+        try {
+            const ok = document.execCommand('copy');
+            setCopied(ok);
+        } catch (err) {
+            console.error('Fallback copy failed', err);
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    }
     const statusColors: Record<string, string> = {
         "На стадии рассмотрения": "bg-yellow-lt",
         "В процессе поиска": "bg-blue-lt",
@@ -318,6 +401,21 @@ export default function AdminRequestPage() {
                         ))}
                     </Box>
 
+                    <Button
+                        variant="contained"
+                        onClick={handleCopy}
+                        sx={{ mb: 3, backgroundColor: 'rgba(7,49,104,0.8)' }}
+                    >
+                        Скопировать текст заявки
+                    </Button>
+
+                    {/* Тост-уведомление */}
+                    <Snackbar
+                        open={copied}
+                        autoHideDuration={3000}
+                        message="Скопировано в буфер обмена"
+                        onClose={() => setCopied(false)}
+                    />
 
                 </Box>
             </Box>
