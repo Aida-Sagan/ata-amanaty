@@ -14,7 +14,11 @@ import "@/styles/global.css";
 import {
     Accordion,
     AccordionSummary,
-    AccordionDetails
+    AccordionDetails,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
@@ -64,7 +68,9 @@ export default function AdminRequestPage() {
     const [status, setStatus] = useState("");
     const [openModal, setOpenModal] = useState(false);
     const [copied, setCopied] = useState(false);
-    
+    const [deleteErrorOpen, setDeleteErrorOpen] = useState(false);
+
+
     useEffect(() => {
         axios.get(`/api/requests?id=${id}`)
             .then(response => {
@@ -218,6 +224,24 @@ export default function AdminRequestPage() {
         "Ожидает ответа от заявителя": "bg-cyan-lt",
         "Обратиться для увековечивания": "bg-lime-lt"
     };
+
+    const handleDelete = () => {
+        setDeleteErrorOpen(true);
+    };
+
+
+    const confirmDelete = async () => {
+        try {
+            await axios.delete(`/api/requests?id=${id}`);
+            router.push("/admin");
+        } catch (error) {
+            console.error("Ошибка при удалении заявки:", error);
+            alert("Не удалось удалить заявку. Попробуйте позже.");
+        } finally {
+            setDeleteErrorOpen(false);
+        }
+    };
+
 
 
     if (loading) {
@@ -404,7 +428,7 @@ export default function AdminRequestPage() {
                     <Button
                         variant="contained"
                         onClick={handleCopy}
-                        sx={{ mb: 3, backgroundColor: 'rgba(7,49,104,0.8)' }}
+                        sx={{ mt: 5,mb: 3, backgroundColor: 'rgba(7,49,104,0.8)', borderRadius: 5 }}
                     >
                         Скопировать текст заявки
                     </Button>
@@ -417,6 +441,15 @@ export default function AdminRequestPage() {
                         onClose={() => setCopied(false)}
                     />
 
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleDelete}
+                        sx={{ mt: 2, borderRadius: 4 }}
+                    >
+                        Удалить заявку
+                    </Button>
+
                 </Box>
             </Box>
 
@@ -428,6 +461,27 @@ export default function AdminRequestPage() {
                     </Button>
                 </Box>
             </Modal>
+
+            <Dialog open={deleteErrorOpen} onClose={() => setDeleteErrorOpen(false)}>
+                <DialogTitle sx={{ fontWeight: "bold", color: "#c62828" }}>
+                    Вы уверены, что хотите удалить эту заявку?
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Это действие необратимо.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={confirmDelete} color="error">
+                        Да, удалить
+                    </Button>
+                    <Button onClick={() => setDeleteErrorOpen(false)} autoFocus>
+                        Отмена
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+
         </Container>
     );
 }

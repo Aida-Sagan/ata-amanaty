@@ -69,3 +69,25 @@ export async function POST(req: Request) {
     }
 }
 
+export async function DELETE(req: Request) {
+    try {
+        await connectDB();
+        const { searchParams } = new URL(req.url);
+        const requestId = searchParams.get("id");
+
+        if (!requestId) {
+            return NextResponse.json({ success: false, message: "ID заявки не передан" }, { status: 400 });
+        }
+
+        const deletedRequest = await Request.findByIdAndDelete(requestId);
+
+        if (!deletedRequest) {
+            return NextResponse.json({ success: false, message: "Заявка не найдена" }, { status: 404 });
+        }
+
+        return NextResponse.json({ success: true, message: "Заявка успешно удалена" });
+    } catch (error) {
+        console.error("Ошибка при удалении заявки:", error);
+        return NextResponse.json({ success: false, message: "Ошибка сервера" }, { status: 500 });
+    }
+}
