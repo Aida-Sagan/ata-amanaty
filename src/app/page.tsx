@@ -107,15 +107,15 @@ export default function HomePage() {
                             }
                         }}
                     >
-                        <Button
-                            variant="text"
-                            href="https://ata-amanaty.framer.website/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            sx={{ textTransform: "none", fontWeight: 500 }}
-                        >
-                            { t('website')}
-                        </Button>
+                        {/*<Button*/}
+                        {/*    variant="text"*/}
+                        {/*    href="https://ata-amanaty.framer.website/"*/}
+                        {/*    target="_blank"*/}
+                        {/*    rel="noopener noreferrer"*/}
+                        {/*    sx={{ textTransform: "none", fontWeight: 500 }}*/}
+                        {/*>*/}
+                        {/*    { t('website')}*/}
+                        {/*</Button>*/}
 
                         <Select
                             value={language === "ru" ? "Русский" : "Қазақша"}
@@ -183,6 +183,108 @@ export default function HomePage() {
                     </Button>
                 </Box>
             </Box>
+
+            <Box
+                sx={{
+                    mt: 5,
+                    p: 3,
+                    backgroundColor: "#fff",
+                    borderRadius: 2,
+                    boxShadow: 3,
+                    maxWidth: 900,
+                    mx: "auto"
+                }}
+            >
+                {language === "ru" ? (
+                    <>
+                        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
+                            Обращение от общественного объединения «Атамның аманаты»
+                        </Typography>
+
+                        <Typography variant="body1" paragraph>
+                            Дорогие потомки дедов и прадедов, воевавших в ВОВ, второй мировой войне!
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                            Те, кто подал заявки общественному обьединению «Атамның аманаты» на поиск без вести пропавших предков:
+                        </Typography>
+                        <ul>
+                            <li><Typography variant="body1">Ваша заявка принята, зарегистрирована в нашем списке и наши поисковики приступят к поиску в архивах сведений о вашем деде/прадеде.</Typography></li>
+                        </ul>
+                        <Typography variant="body1" paragraph>В связи с этим хочу дать некоторые разъяснения:</Typography>
+                        <ul>
+                            <li><Typography variant="body1">Все документы и данные по войне находятся в российских архивах. По нашим сведениям, они пока полностью не открыты.</Typography></li>
+                            <li><Typography variant="body1">Когда откроются — неизвестно. Возможно, данных о вашем предке там не будет. Есть архивы, которые вообще не будут рассекречены.</Typography></li>
+                            <li><Typography variant="body1">Не обещаем найти точное место захоронения вашего деда/прадеда.</Typography></li>
+                            <li><Typography variant="body1">Но мы продолжаем поиски. Архивы всё больше оцифровываются.</Typography></li>
+                            <li><Typography variant="body1">Мы волонтёры и работаем в свободное время. Если не связываемся — значит пока нет новостей.</Typography></li>
+                        </ul>
+                        <Typography variant="body1" paragraph>
+                            Мы делаем это ради памяти. Мы не имеем права забывать. Это наша миссия.
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                            От имени объединения «Атамның аманаты» выражаем вам соболезнования. Светлая память вашим дедам.
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                            Спасибо и вам, потомкам. Вы помните, вы ищете.
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                            Сделаем всё возможное, чтобы вернуть имена 271 503 пропавших без вести казахстанцев.
+                        </Typography>
+                        <Typography variant="body1" paragraph sx={{ fontWeight: "bold" }}>
+                            Мира и благополучия всем вашим семьям!
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 2, fontStyle: "italic" }}>
+                            С уважением, Алия Сагимбаева, учредитель ОО «Атамның аманаты», Астана.
+                        </Typography>
+                    </>
+                ) : (
+                    <>
+                        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
+                            «Атамның аманаты» қоғамдық бірлестігінің үндеуі
+                        </Typography>
+
+                        <Typography variant="body1" paragraph>
+                            Құрметті батыр аталарымыздың ұрпақтары!
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                            1939–1945 жж соғыста хабар-ошарсыз кеткен аталарын іздеуге өтініш бергендерге:
+                        </Typography>
+                        <ul>
+                            <li><Typography variant="body1">Өтінішіңіз қабылданып, тіркелді. Іздеушілеріміз мұрағаттан ақпарат іздеуге кіріседі.</Typography></li>
+                        </ul>
+                        <Typography variant="body1" paragraph>Біраз түсініктеме берейік:</Typography>
+                        <ul>
+                            <li><Typography variant="body1">Құжаттар Ресей мұрағаттарында сақтаулы. Олар толық ашылмаған.</Typography></li>
+                            <li><Typography variant="body1">Қашан ашылатыны белгісіз. Ашылған күннің өзінде дерек болмауы мүмкін.</Typography></li>
+                            <li><Typography variant="body1">Жерленген жерді анықтап бере алатынымызға кепілдік жоқ.</Typography></li>
+                            <li><Typography variant="body1">Дегенмен, іздеуді жалғастырамыз. Мұрағаттар оцифрланып жатыр.</Typography></li>
+                            <li><Typography variant="body1">Іздеушілер хабарласпаса — ренжімеңіздер. Біз бәріміз еріктіміз, бос уақытымызда жұмыс істейміз.</Typography></li>
+                        </ul>
+                        <Typography variant="body1" paragraph>
+                            Біз не үшін мұндай күрделі жұмыспен айналысып жүргенімізді жақсы түсінеміз. Біз батыр аталарымыздың есімдерін қайта жаңғыртуымыз керек!
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                            «Атамның аманаты» атынан, бүкіл қазақ халқының атынан көңіл айтамыз.
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                            Ерлікпен қаза тапқан ата-бабаларымыздың рухтарына тағзым етеміз. Жарық жұлдыздай жандары тыныш болсын.
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                            Сіздерге де мың алғыс — ұмытпай, аманатқа адал болып, іздеп жатқандарыңыз үшін.
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                            271 503 хабар-ошарсыз кеткен қазақ жауынгерінің есімін қайта жаңғыртамыз.
+                        </Typography>
+                        <Typography variant="body1" paragraph sx={{ fontWeight: "bold" }}>
+                            Еліміз аман, жұртымыз тыныш болсын!
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 2, fontStyle: "italic" }}>
+                            Құрметпен, Әлия Нұрпақызы Сағымбаева, «Атамның аманаты» қоғамдық бірлестігінің құрылтайшысы, Астана.
+                        </Typography>
+                    </>
+                )}
+            </Box>
+
             <Box
                 sx={{
                     p: 2,
